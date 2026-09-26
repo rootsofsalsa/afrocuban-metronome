@@ -1,0 +1,698 @@
+<meta charset="utf-8">
+<title>AfroCuban Metronome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#E9ECE7; --surface:#F7F8F5; --surface-2:#DFE3DC; --ink:#17201B; --muted:#5B665F; --line:#C9CFC6;
+  --accent:#2C47D0; --accent-ink:#FFFFFF; --hot:#D98E04; --hot-soft:#F6DFA8; --live:#1E8A55;
+  --display:"Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F1311; --surface:#181D1A; --surface-2:#222924; --ink:#E4EAE5; --muted:#8E9A92; --line:#2E3631;
+    --accent:#8095FF; --accent-ink:#0B0F1F; --hot:#F2B632; --hot-soft:#4A3A12; --live:#4CC98A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1311; --surface:#181D1A; --surface-2:#222924; --ink:#E4EAE5; --muted:#8E9A92; --line:#2E3631;
+  --accent:#8095FF; --accent-ink:#0B0F1F; --hot:#F2B632; --hot-soft:#4A3A12; --live:#4CC98A;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;padding:0 16px 40px}
+.wrap{max-width:1180px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding-block:18px 14px}
+.brand{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:.02em;text-transform:uppercase}
+.brand small{font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--muted);margin-left:8px}
+.keys{font-family:var(--mono);font-size:11.5px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--surface);color:var(--ink)}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:880px){.grid{grid-template-columns:1fr}}
+.stack{display:grid;gap:16px}
+@media (min-width:881px){.grid .transport{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}}
+.transport{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;position:relative;overflow:hidden;display:grid;gap:18px}
+.tempo-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
+.nudge{width:54px;height:54px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-size:26px;cursor:pointer;line-height:1}
+.nudge:hover{border-color:var(--accent)}
+.bpm-wrap{text-align:center}
+#bpmOut{font-family:var(--display);font-weight:800;font-size:clamp(96px,16vw,150px);line-height:.9;font-variant-numeric:tabular-nums;display:block;letter-spacing:-.01em}
+.bpm-meta{display:flex;justify-content:center;gap:10px;align-items:baseline;margin-top:4px}
+.unit{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--muted)}
+#marking{color:var(--muted);font-size:15px}
+input[type=range]{width:100%;accent-color:var(--accent);height:22px;margin:0}
+.ctrls{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:10px}
+.btn{font:600 15px var(--body);border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:12px 14px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-size:17px;letter-spacing:.02em}
+.btn.primary.on{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.btn:focus-visible,.chip:focus-visible,.pad:focus-visible,.cell:focus-visible,.nudge:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#tap.hit{background:var(--hot-soft);border-color:var(--hot)}
+.pads{display:grid;grid-template-columns:repeat(auto-fit,minmax(40px,1fr));gap:8px}
+.pad{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;height:92px;padding:8px 6px 6px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;cursor:pointer;position:relative;color:var(--muted);transition:transform .06s}
+.pad .seg{height:14px;border-radius:3px;background:var(--line)}
+.pad .seg.fill{background:var(--accent)}
+.pad[data-level="3"] .seg.fill{background:var(--hot)}
+.pad .num{font-family:var(--mono);font-size:11px;text-align:center;margin-top:2px}
+.pad.group-start{box-shadow:inset 3px 0 0 var(--muted)}
+.pad.now{border-color:var(--ink);transform:translateY(-3px);color:var(--ink);background:var(--surface)}
+.pad.now .seg.fill{filter:brightness(1.15)}
+.hint{font-size:12.5px;color:var(--muted)}
+.status{display:flex;flex-wrap:wrap;gap:8px 20px;font-family:var(--mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.status b{color:var(--ink);font-weight:600}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line)}
+.pill.live{color:var(--live);border-color:var(--live)}
+.pill.silent{color:var(--hot);border-color:var(--hot)}
+.patview{border-top:1px dashed var(--line);padding-top:16px;display:grid;gap:8px}
+.patview h3{margin:0;font-size:13px;font-weight:600;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.patview h3 span{font-family:var(--mono);font-weight:400;color:var(--muted);font-size:11.5px}
+.cells{display:grid;gap:4px}
+.cell{height:34px;border-radius:6px;border:1px solid var(--line);background:transparent;cursor:pointer;padding:0;position:relative}
+.cell.hit{background:var(--ink);border-color:var(--ink)}
+.cells{gap:6px!important}
+.cell.gs::before,.cell.half::before{content:"";position:absolute;left:-4.5px;top:2px;bottom:2px;width:1px;background:var(--line)}
+.cell.half::before{width:2px;left:-5px;top:-3px;bottom:-3px;background:var(--muted)}
+.cell.now{outline:2px solid var(--hot);outline-offset:1px}
+.meter-sum{display:flex;align-items:center;gap:14px}
+.sig{font-family:var(--display);font-weight:800;font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+#freeMeter[hidden]{display:none!important}
+.cell.hit.now{background:var(--hot);border-color:var(--hot)}
+.lane{display:grid;gap:6px}
+.lane-head{display:flex;justify-content:space-between;align-items:center;gap:6px 10px;flex-wrap:wrap}
+.lane-tools{display:flex;flex-wrap:wrap;gap:2px}
+.mute{font:600 12.5px var(--body);border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:99px;padding:4px 12px 4px 10px;cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.mute::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
+.mute.on{color:var(--ink);border-color:var(--ink)}
+.mute.on::before{background:var(--live)}
+.mini{font:500 12px var(--body);border:0;background:transparent;color:var(--accent);cursor:pointer;padding:3px 6px;border-radius:6px}
+.mini:hover{background:var(--surface-2)}
+.lane.off .cells{opacity:.35}
+.lane.silent .cells{opacity:.2}
+.lane.silent .mute{border-style:dashed}
+#metCells .cell{height:28px}
+.cell.m1{background:color-mix(in srgb,var(--accent) 24%,transparent);border-color:var(--accent)}
+.cell.m2{background:var(--accent);border-color:var(--accent)}
+.cell.m2.now,.cell.m1.now{outline-color:var(--hot)}
+.key{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--line);vertical-align:-2px;margin-left:4px}
+.key.k1{background:color-mix(in srgb,var(--accent) 24%,transparent);border-color:var(--accent)}
+.key.k2{background:var(--accent);border-color:var(--accent);margin-left:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px}
+.panel h2{margin:0;font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lbl{font-size:13px;color:var(--muted);min-width:88px}
+.chip{font:500 13.5px var(--body);border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:6px 12px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.stepper button{border:0;background:transparent;color:var(--ink);width:34px;height:32px;font-size:17px;cursor:pointer}
+.stepper button:hover{background:var(--surface-2)}
+.stepper output{min-width:34px;text-align:center;font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+.slider{display:grid;grid-template-columns:88px 1fr 48px;gap:10px;align-items:center}
+.slider span:first-child{font-size:13px;color:var(--muted)}
+.slider output{font-family:var(--mono);font-size:12px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+select,input[type=text],input[type=number]{font:500 14px var(--body);color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+input[type=number]{width:72px;font-family:var(--mono)}
+.sw{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer}
+.sw input{accent-color:var(--accent);width:16px;height:16px}
+.sub{display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px}
+.sub .row{font-size:13.5px}
+.presets{display:grid;gap:6px}
+.preset{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.preset .meta{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.preset button{font:500 12.5px var(--body);border:0;background:transparent;color:var(--accent);cursor:pointer;padding:4px 6px}
+.empty{font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){.pad{transition:none}}
+@media (max-width:480px){.ctrls{grid-template-columns:1fr 1fr}.ctrls .primary{grid-column:1/-1;order:-1}.slider{grid-template-columns:70px 1fr 42px}.lbl{min-width:0;width:100%}.pad{height:74px}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">AfroCuban<small>METRONOME</small></div>
+    <div class="keys"><span><kbd>Space</kbd> start/stop</span><span><kbd>↑</kbd><kbd>↓</kbd> ±1 (<kbd>Shift</kbd> ±5)</span><span><kbd>T</kbd> tap</span></div>
+  </header>
+
+  <div class="grid">
+    <section class="transport" id="transport" aria-label="Transport">
+      <div class="tempo-row">
+        <button class="nudge" id="minus" aria-label="Slower">−</button>
+        <div class="bpm-wrap">
+          <output id="bpmOut" aria-live="polite">96</output>
+          <div class="bpm-meta"><span class="unit">BPM</span><span id="marking">per half note</span></div>
+        </div>
+        <button class="nudge" id="plus" aria-label="Faster">+</button>
+      </div>
+      <input type="range" id="bpm" min="20" max="300" value="96" aria-label="Tempo">
+      <div class="ctrls">
+        <button class="btn" id="tap">Tap tempo</button>
+        <button class="btn primary" id="play">Start</button>
+        <input type="number" id="bpmNum" min="20" max="300" value="96" aria-label="Exact tempo" style="width:100%">
+      </div>
+      <div class="status">
+        <span>Bar <b id="barOut">0</b></span>
+        <span>Time <b id="timeOut">0:00</b></span>
+        <span id="stateOut"><span class="pill">Stopped</span></span>
+        <span id="trainerOut"></span>
+      </div>
+      <div class="patview" id="patview">
+        <h3><span id="patName" style="font-family:var(--body);color:var(--ink);font-size:13px;font-weight:600">Grid</span><span id="patInfo">16 steps · 2 bars</span></h3>
+        <div class="lane" id="metLane">
+          <div class="lane-head">
+            <button class="mute on" id="metToggle" aria-pressed="true">Metronome</button>
+            <div class="lane-tools"><button class="mini" data-met="beats" title="Every beat of the time signature (the numerator)">Beats</button><button class="mini" data-met="down" title="Only where the BPM is measured">Downbeats</button><button class="mini" data-met="all">Every step</button><button class="mini" data-met="clear">Clear</button></div>
+          </div>
+          <div class="cells" id="metCells"></div>
+        </div>
+        <div class="lane" id="patLane">
+          <div class="lane-head"><button class="mute on" id="patToggle" aria-pressed="true"><span id="patLaneName">Pattern</span></button></div>
+          <div class="cells" id="cells"></div>
+        </div>
+        <p class="hint" style="margin:0"><span class="key k2"></span> downbeat click <span class="key k1"></span> click <span class="key k0"></span> off. Click a metronome step to cycle it<span id="patHint">; click a pattern step to add or remove a stroke</span>.</p>
+      </div>
+    </section>
+
+    <div class="stack">
+      <section class="panel" aria-labelledby="h-meter">
+        <h2 id="h-meter">Meter &amp; subdivision</h2>
+        <div class="meter-sum" id="meterSum" hidden>
+          <span class="sig" id="sigOut">6/8</span>
+          <div><div id="sigNote" style="font-weight:600">Counted in 2</div><div class="hint" id="sigSub">BPM = dotted quarter note</div></div>
+        </div>
+        <p class="hint" id="gridNote" style="margin:0" hidden>The meter follows the pattern's "One cycle" setting. Set clicks on the metronome row.</p>
+        <div id="freeMeter" style="display:grid;gap:14px">
+        <div class="row" id="meters"><span class="lbl">Time</span></div>
+        <div class="row" id="subs"><span class="lbl">Subdivide</span></div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-clave">
+        <h2 id="h-clave">Clave, campana &amp; catá</h2>
+        <div class="row"><span class="lbl">Pattern</span>
+          <select id="pattern" aria-label="Pattern"></select>
+        </div>
+        <div class="row"><span class="lbl">One cycle</span>
+          <select id="span" aria-label="Pattern span"></select>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-sound">
+        <h2 id="h-sound">Sound &amp; mix</h2>
+        <div class="row" id="sounds"><span class="lbl">Click</span></div>
+        <div class="row" id="downSounds"><span class="lbl">Downbeat click</span></div>
+        <div class="row" id="patSounds"><span class="lbl">Pattern</span></div>
+        <div class="slider"><span>Master</span><input type="range" id="vMaster" min="0" max="100" value="80"><output id="vMasterOut">80</output></div>
+        <div class="slider"><span>Clicks</span><input type="range" id="vBeat" min="0" max="100" value="85"><output id="vBeatOut">85</output></div>
+        <div class="slider"><span>Pattern</span><input type="range" id="vPat" min="0" max="100" value="80"><output id="vPatOut">80</output></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-practice">
+        <h2 id="h-practice">Practice tools</h2>
+        <div class="sub">
+          <label class="sw"><input type="checkbox" id="trOn"> <b>Speed trainer</b></label>
+          <div class="row">Change by <input type="number" id="trStep" value="2" min="-20" max="20"> BPM every <input type="number" id="trEvery" value="4" min="1" max="64"> bars until <input type="number" id="trTarget" value="140" min="20" max="300"></div>
+        </div>
+        <div class="sub">
+          <label class="sw"><input type="checkbox" id="gapOn"> <b>Listen, then play</b> <span class="hint">silent sections for ear training</span></label>
+          <div class="row">Silence <select id="gapWhat" aria-label="What goes silent">
+            <option value="pattern">the pattern only (you play it)</option>
+            <option value="clicks">the metronome only</option>
+            <option value="all">everything</option>
+          </select></div>
+          <div class="row" style="display:block;line-height:2.6">Play <input type="number" id="gapPlay" value="2" min="1" max="32"> <span class="gapUnit">cycles</span>, then silence <input type="number" id="gapMute" value="2" min="1" max="32"> <span class="gapUnit">cycles</span></div>
+          <p class="hint" id="gapHint" style="margin:0"></p>
+        </div>
+        <label class="sw"><input type="checkbox" id="countIn"> Count in one bar before patterns and trainers start</label>
+      </section>
+
+      <section class="panel" aria-labelledby="h-presets">
+        <h2 id="h-presets">Saved setups</h2>
+        <div class="row"><input type="text" id="presetName" placeholder="e.g. Yambú 84" style="flex:1;min-width:0"><button class="btn" id="savePreset" style="padding:8px 14px">Save</button></div>
+        <div class="presets" id="presetList"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+
+/* ---------- Patterns (step indices, 0-based) ---------- */
+const PATTERNS = {
+  none:       {name:"Off", steps:0, hits:[]},
+  tresdos:    {name:"Clave Tres Dos", steps:16, hits:[0,3,6,10,12]},
+  yambu:      {name:"Clave de Yambú Matancera", steps:16, hits:[0,3,4,7,8,10,12]},
+  dostres:    {name:"Clave Dos Tres", steps:16, hits:[0,3,7,10,12]},
+  abakua:     {name:"Campana de Abakuá", steps:12, hits:[0,2,5,7,9]},
+  seisxocho:  {name:"Campana Seis por Ocho", steps:12, hits:[0,2,4,5,7,9,11]},
+  guiro:      {name:"Campana de Güiro", steps:12, hits:[1,2,4,5,7,9,11]},
+  habanero:   {name:"Catá Habanero", steps:16, hits:[0,2,3,5,7,8,10,12,13,15]},
+  matancero:  {name:"Catá Matancero", steps:16, hits:[0,1,3,4,5,7,8,10,12,13,15]},
+  columbia:   {name:"Catá de Columbia", steps:12, hits:[0,2,3,5,6,7,9]},
+};
+const SPANS = {
+  16: [{id:"2bar", num:2, sig:"4/4", unit:"half note", note:"Cut time · counted in 2", sub2:"BPM = half note · one cycle spans 2 bars", label:"2 bars of 4/4 (8th-note grid)", spb:4, beats:2, accents:[3,2], sub:2},
+       {id:"1bar", num:4, sig:"4/4", unit:"half note", note:"Cut time · counted in 2", sub2:"BPM = half note · one cycle spans 1 bar", label:"1 bar of 4/4 (16th-note grid)", spb:8, beats:2, accents:[3,2], sub:4}],
+  12: [{id:"dq", num:1, sig:"6/8", unit:"dotted quarter note", note:"Counted in 2", sub2:"BPM = dotted quarter note · one cycle spans 2 bars", label:"2 bars of 6/8 (dotted-quarter pulse)", spb:3, beats:2, accents:[3,2], sub:3},
+       {id:"e", num:1, sig:"6/8", unit:"eighth note", note:"Counted in 6", sub2:"BPM = eighth note · one cycle spans 2 bars", label:"2 bars of 6/8 (eighth-note pulse)", spb:1, beats:6, accents:[3,1,1,2,1,1], sub:1}],
+};
+const METERS = [
+  {id:"44in2", label:"4/4 cut time (in 2)", beats:2, acc:[3,2], unit:"half note", per:2, sub:2},
+  {id:"44in4", label:"4/4 (in 4)", beats:4, acc:[3,2,2,2], unit:"quarter note", per:1, sub:2},
+  {id:"68in2", label:"6/8 (in 2)", beats:2, acc:[3,2], unit:"dotted quarter note", per:3, sub:3},
+  {id:"68in6", label:"6/8 (in 6)", beats:6, acc:[3,1,1,2,1,1], unit:"eighth note", per:1, sub:1},
+];
+const SUBS = [{n:1,label:"None"},{n:2,label:"2 per beat"},{n:3,label:"3 per beat"},{n:4,label:"4 per beat"},{n:6,label:"6 per beat"}];
+const SOUNDS = [{id:"click",label:"Click"},{id:"wood",label:"Woodblock"},{id:"clave",label:"Clave"},{id:"cowbell",label:"Cowbell"},{id:"stick",label:"Rim"},{id:"beep",label:"Beep"}];
+
+/* ---------- State ---------- */
+const DEFAULT = {
+  bpm:80, beats:2, accents:[3,2], sub:2, unit:"half note", per:2,
+  sound:"wood", downSound:"click", patSound:"clave",
+  met:null, freeMet:null, metOn:true, patOn:true,
+  vol:{master:80, beat:85, sub:45, pat:80},
+  pattern:"tresdos", hits:null, span:"2bar",
+  tr:{on:false, step:2, every:4, target:140}, gap:{on:false, play:2, mute:2, what:"pattern"}, countIn:false,
+};
+let S = Object.assign(structuredClone(DEFAULT), store.get("madera.state.v2", {}));
+S.vol = Object.assign({}, DEFAULT.vol, S.vol); S.tr = Object.assign({}, DEFAULT.tr, S.tr); S.gap = Object.assign({}, DEFAULT.gap, S.gap);
+if(!PATTERNS[S.pattern]){ S.pattern = "none"; S.hits = null; }
+const save = () => store.set("madera.state.v2", S);
+const curHits = () => S.hits || PATTERNS[S.pattern].hits;
+const curSpan = () => { const p = PATTERNS[S.pattern]; if(!p.steps) return null; return SPANS[p.steps].find(s => s.id === S.span) || SPANS[p.steps][0]; };
+// One step grid drives everything. With a pattern: the pattern's grid. Without: one bar of beats x subdivision.
+function gridInfo(){
+  const sp = curSpan();
+  // spb = steps per BPM beat (where tempo is measured); num = steps per numerator beat of the time signature
+  if(sp) return {steps:PATTERNS[S.pattern].steps, spb:sp.spb, num:sp.num, beats:sp.beats, pattern:true};
+  const per = S.per || 1, num = S.sub % per === 0 ? S.sub / per : S.sub;
+  return {steps:S.beats*S.sub, spb:S.sub, num, beats:S.beats, pattern:false};
+}
+// Metronome row: 0 = off, 1 = click, 2 = downbeat click
+function defaultMet(mode){
+  const g = gridInfo();
+  return Array.from({length:g.steps}, (_, i) => {
+    if(mode === "clear") return 0;
+    const onPulse = i % g.spb === 0;            // where BPM is measured
+    if(mode === "down") return onPulse ? 2 : 0;
+    if(mode === "all") return onPulse ? 2 : 1;
+    // "beats" (and pattern default): every numerator beat, downbeat click where BPM is measured
+    return i % g.num === 0 ? (onPulse ? 2 : 1) : 0;
+  });
+}
+const metKey = () => gridInfo().pattern ? "met" : "freeMet";
+const curMet = () => { const g = gridInfo(), m = S[metKey()]; return (Array.isArray(m) && m.length === g.steps) ? m : defaultMet("auto"); };
+
+/* ---------- Audio ---------- */
+let ctx = null, master = null, noise = null;
+function initAudio(){
+  if(ctx) return;
+  ctx = new (window.AudioContext || window.webkitAudioContext)({latencyHint:"interactive"});
+  master = ctx.createGain(); master.gain.value = (S.vol.master/100)**2;
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -6; comp.ratio.value = 4;
+  master.connect(comp).connect(ctx.destination);
+  noise = ctx.createBuffer(1, ctx.sampleRate*0.5, ctx.sampleRate);
+  const d = noise.getChannelData(0); for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+}
+function env(g, t, peak, dec){
+  peak = Math.max(peak, 0.0002);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(peak, t+0.0015);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dec);
+}
+function osc(type, f, t, dur, dest){ const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); o.connect(dest); o.start(t); o.stop(t+dur+0.02); return o; }
+function burst(t, dur, dest){ const s = ctx.createBufferSource(); s.buffer = noise; s.connect(dest); s.start(t); s.stop(t+dur+0.02); }
+function voice(kind, t, gain, role){
+  if(gain <= 0.001) return;
+  const g = ctx.createGain(); g.connect(master);
+  const R = (a,b,c) => role === "accent" ? a : role === "beat" ? b : c;
+  switch(kind){
+    case "click": { env(g,t,gain*0.9,0.035); osc("sine",R(2000,1500,1100),t,0.04,g); break; }
+    case "beep":  { env(g,t,gain*0.6,0.11); osc("sine",R(1320,880,660),t,0.12,g); break; }
+    case "wood": {
+      const bp = ctx.createBiquadFilter(); bp.type="bandpass"; bp.Q.value=3; const f = R(1050,820,640); bp.frequency.value=f*1.2; bp.connect(g);
+      env(g,t,gain*1.4,0.075);
+      const o = osc("triangle",f,t,0.08,bp); o.frequency.exponentialRampToValueAtTime(f*0.86,t+0.05);
+      const ng = ctx.createGain(); env(ng,t,gain*0.25,0.012); ng.connect(bp); burst(t,0.015,ng);
+      break;
+    }
+    case "clave": { env(g,t,gain*0.75,R(0.14,0.12,0.08)); osc("sine",R(2750,2500,2250),t,0.15,g);
+      const ng = ctx.createGain(); const hp = ctx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=3000; ng.connect(hp).connect(master); env(ng,t,gain*0.15,0.008); burst(t,0.01,ng); break; }
+    case "cowbell": {
+      const bp = ctx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=1100; bp.Q.value=1.2; bp.connect(g);
+      env(g,t,gain*0.5,R(0.38,0.22,0.08));
+      osc("square",562,t,0.4,bp); osc("square",845,t,0.4,bp); break;
+    }
+    case "stick": {
+      const hp = ctx.createBiquadFilter(); hp.type="bandpass"; hp.frequency.value=R(4200,3600,3000); hp.Q.value=2; hp.connect(g);
+      env(g,t,gain*2.2,0.03); burst(t,0.035,hp);
+      const g2 = ctx.createGain(); g2.connect(master); env(g2,t,gain*0.3,0.02); osc("sine",R(2200,1800,1500),t,0.03,g2); break;
+    }
+  }
+}
+
+/* ---------- Scheduler ---------- */
+let running = false, timer = null, nextT = 0, beatInBar = 0, bar = 0, totalBeats = 0, startT = 0, lastBarShown = -1, countInBeats = 0;
+const queue = [];
+const LOOK = 0.12, TICK = 25;
+function subOffsets(n){
+  const out = [];
+  for(let i=1;i<n;i++){
+    let pos = i/n;
+    out.push(pos);
+  }
+  return out;
+}
+function gapBarsPerUnit(){ const g = gridInfo(); return g.pattern ? Math.max(1, g.steps / (g.spb * g.beats)) : 1; }
+function scheduleBeat(t){
+  const spb = 60 / S.bpm;
+  const counting = countInBeats > 0;
+  // Silent sections count in pattern cycles (or bars with no pattern)
+  const gi = gridInfo(), bpc = gapBarsPerUnit(), unit = Math.floor(bar / bpc), cycle = S.gap.play + S.gap.mute, phase = unit % cycle;
+  const gapSilent = !counting && S.gap.on && phase >= S.gap.play;
+  const what = gi.pattern ? S.gap.what : "all";
+  const muteClicks = gapSilent && what !== "pattern";
+  const mutePat = gapSilent && what !== "clicks";
+  const muted = muteClicks && mutePat;
+  const gapLabel = !S.gap.on || counting ? "" : gapSilent ? `Your turn · ${phase - S.gap.play + 1} of ${S.gap.mute}` : `Listen · ${phase + 1} of ${S.gap.play}`;
+  const lvl = counting ? (beatInBar === 0 ? 3 : 2) : (S.accents[beatInBar] ?? 2);
+  const bv = (S.vol.beat/100)**2;
+  if(counting){
+    // Count-in: plain beat clicks
+    voice(lvl === 3 ? S.downSound : S.sound, t, lvl === 3 ? bv : bv*0.62, lvl === 3 ? "accent" : "beat");
+  } else {
+    // Metronome row (and pattern row, if any) on one step grid
+    const g = gridInfo(), met = curMet(), hits = g.pattern ? curHits() : [], pb = totalBeats;
+    const pv = (S.vol.pat/100)**2;
+    for(let k=0;k<g.spb;k++){
+      const step = (pb*g.spb + k) % g.steps;
+      const st = t + k*(spb/g.spb);
+      if(S.metOn && !muteClicks){
+        if(met[step] === 2) voice(S.downSound, st, bv, "accent");
+        else if(met[step] === 1) voice(S.sound, st, bv*0.62, "beat");
+      }
+      if(g.pattern && S.patOn && !mutePat && hits.includes(step)) voice(S.patSound, st, pv, "accent");
+      queue.push({t:st, kind:"p", step});
+    }
+  }
+  queue.push({t, kind:"b", beat:beatInBar, bar, muted, counting, gapSilent, mutePat, gapLabel});
+  // advance
+  nextT += spb;
+  beatInBar++;
+  if(!counting) totalBeats++;
+  if(counting) countInBeats--;
+  if(beatInBar >= S.beats){
+    beatInBar = 0;
+    if(!counting) {
+      bar++;
+      if(S.tr.on && bar % Math.max(1,S.tr.every) === 0 && S.bpm !== S.tr.target){
+        const dir = Math.sign(S.tr.target - S.bpm);
+        const step = Math.abs(S.tr.step) * dir;
+        let nb = S.bpm + step;
+        if((dir > 0 && nb > S.tr.target) || (dir < 0 && nb < S.tr.target)) nb = S.tr.target;
+        setBpm(nb, true);
+      }
+    }
+  }
+}
+function loop(){
+  while(nextT < ctx.currentTime + LOOK) scheduleBeat(nextT);
+}
+let wake = null;
+async function start(){
+  initAudio();
+  if(ctx.state === "suspended") await ctx.resume();
+  beatInBar = 0; bar = 0; totalBeats = 0; queue.length = 0;
+  countInBeats = S.countIn ? S.beats : 0;
+  nextT = ctx.currentTime + 0.06; startT = nextT;
+  running = true; timer = setInterval(loop, TICK); loop();
+  $("play").textContent = "Stop"; $("play").classList.add("on");
+  try{ wake = await navigator.wakeLock?.request("screen"); }catch(e){ wake = null; }
+  requestAnimationFrame(draw);
+}
+function stop(){
+  running = false; clearInterval(timer); queue.length = 0;
+  $("play").textContent = "Start"; $("play").classList.remove("on");
+  document.querySelectorAll(".pad.now,.cell.now").forEach(e => e.classList.remove("now"));
+  $("stateOut").innerHTML = '<span class="pill">Stopped</span>';
+  $("patLane").classList.remove("silent");
+  try{ wake?.release(); }catch(e){} wake = null;
+}
+$("play").onclick = () => running ? stop() : start();
+
+/* ---------- Visuals ---------- */
+function draw(){
+  if(!running) return;
+  const now = ctx.currentTime;
+  while(queue.length && queue[0].t <= now){
+    const ev = queue.shift();
+    if(ev.kind === "b"){
+      document.querySelectorAll(".pad.now").forEach(e => e.classList.remove("now"));
+      
+      $("barOut").textContent = ev.counting ? "count-in" : (ev.bar + 1);
+      $("stateOut").innerHTML = ev.counting ? '<span class="pill silent">Count-in</span>' : ev.gapSilent ? `<span class="pill silent">${ev.gapLabel}</span>` : ev.gapLabel ? `<span class="pill live">${ev.gapLabel}</span>` : '<span class="pill live">Playing</span>';
+      $("patLane").classList.toggle("silent", !!ev.mutePat);
+    } else {
+      document.querySelectorAll(".cell.now").forEach(e => e.classList.remove("now"));
+      const c = $("cells").children[ev.step]; if(c) c.classList.add("now");
+      const m = $("metCells").children[ev.step]; if(m) m.classList.add("now");
+    }
+  }
+  const el = Math.max(0, now - startT);
+  $("timeOut").textContent = Math.floor(el/60) + ":" + String(Math.floor(el%60)).padStart(2,"0");
+  requestAnimationFrame(draw);
+}
+
+/* ---------- UI builders ---------- */
+function unitLabel(){ const sp = curSpan(); return "per " + (sp ? sp.unit : (S.unit || "quarter note")); }
+function setBpm(v, fromTrainer){
+  v = Math.round(Math.min(300, Math.max(20, v)));
+  S.bpm = v;
+  $("bpmOut").textContent = v; $("bpm").value = v;
+  if(document.activeElement !== $("bpmNum")) $("bpmNum").value = v;
+  $("marking").textContent = unitLabel();
+  renderTrainer();
+  save();
+}
+function renderTrainer(){
+  $("trainerOut").innerHTML = S.tr.on ? (S.bpm === S.tr.target ? `Trainer <b>at target</b>` : `Trainer → <b>${S.tr.target}</b>`) : "";
+}
+function renderPads(){
+  document.querySelectorAll("#meters .chip").forEach(c => {
+    const m = METERS[+c.dataset.i];
+    c.classList.toggle("on", m.beats === S.beats && m.acc.join() === S.accents.join() && m.unit === S.unit);
+  });
+  renderPattern();
+}
+function setBeats(n, acc){
+  n = Math.min(16, Math.max(1, n));
+  if(acc){ S.accents = acc.slice(); }
+  else {
+    const a = S.accents.slice(0, n);
+    while(a.length < n) a.push(2);
+    if(a.length) a[0] = a[0] || 3;
+    S.accents = a;
+  }
+  S.beats = n; S.freeMet = null;
+  if(beatInBar >= n) beatInBar = 0;
+  renderPads(); save();
+}
+function chips(boxId, items, getOn, onPick){
+  const box = $(boxId);
+  box.querySelectorAll(".chip").forEach(c => c.remove());
+  items.forEach((it, i) => {
+    const c = document.createElement("button"); c.className = "chip"; c.textContent = it.label; c.dataset.i = i;
+    c.onclick = () => { onPick(it, i); };
+    box.appendChild(c);
+  });
+  const refresh = () => box.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", getOn(items[+c.dataset.i])));
+  refresh(); return refresh;
+}
+function applyMeter(m, withSub){ S.unit = m.unit; S.per = m.per; if(withSub){ S.sub = m.sub; refreshSubs(); } setBeats(m.beats, m.acc); }
+chips("meters", METERS, () => false, m => applyMeter(m, true));
+const refreshSubs = chips("subs", SUBS, it => it.n === S.sub, it => { S.sub = it.n; S.freeMet = null; refreshSubs(); renderPattern(); save(); });
+const refreshSounds = chips("sounds", SOUNDS, it => it.id === S.sound, it => { S.sound = it.id; refreshSounds(); save(); preview(it.id); });
+const refreshDownSounds = chips("downSounds", SOUNDS, it => it.id === S.downSound, it => { S.downSound = it.id; refreshDownSounds(); save(); preview(it.id); });
+const refreshPatSounds =chips("patSounds", SOUNDS, it => it.id === S.patSound, it => { S.patSound = it.id; refreshPatSounds(); save(); preview(it.id); });
+function preview(kind){ if(running) return; initAudio(); ctx.resume(); voice(kind, ctx.currentTime + 0.02, (S.vol.beat/100)**2, "accent"); }
+
+
+/* Pattern UI */
+const patSel = $("pattern");
+Object.entries(PATTERNS).forEach(([id, p]) => { const o = document.createElement("option"); o.value = id; o.textContent = p.name; patSel.appendChild(o); });
+function renderSpanOptions(){
+  const p = PATTERNS[S.pattern]; const sel = $("span"); sel.innerHTML = "";
+  sel.disabled = !p.steps;
+  if(!p.steps){ const o = document.createElement("option"); o.textContent = "—"; sel.appendChild(o); return; }
+  SPANS[p.steps].forEach(s => { const o = document.createElement("option"); o.value = s.id; o.textContent = s.label; sel.appendChild(o); });
+  if(!SPANS[p.steps].some(s => s.id === S.span)) S.span = SPANS[p.steps][0].id;
+  sel.value = S.span;
+}
+function applySpanMeter(){
+  const sp = curSpan(); if(!sp) return;
+  setBeats(sp.beats, sp.accents);
+  S.sub = sp.sub; refreshSubs();
+}
+function renderPattern(){
+  const p = PATTERNS[S.pattern], g = gridInfo(), met = curMet();
+  patSel.value = S.pattern;
+  $("marking").textContent = unitLabel();
+  { const bpc = gapBarsPerUnit(); document.querySelectorAll(".gapUnit").forEach(e => e.textContent = g.pattern ? "cycles" : "bars");
+    $("gapHint").textContent = g.pattern ? `One cycle = ${bpc} bar${bpc > 1 ? "s" : ""} of ${p.name}.` : "With no pattern selected, silence applies to the clicks.";
+    $("gapWhat").disabled = !g.pattern; }
+  $("gridNote").hidden = !g.pattern;
+  $("meterSum").hidden = !g.pattern;
+  $("freeMeter").hidden = g.pattern;
+  $("patLane").hidden = !g.pattern;
+  $("patHint").hidden = !g.pattern;
+  let sep;
+  if(g.pattern){
+    const sp = curSpan();
+    $("sigOut").textContent = sp.sig; $("sigNote").textContent = sp.note; $("sigSub").textContent = sp.sub2;
+    $("patLaneName").textContent = p.name + (S.hits ? " (edited)" : "");
+    $("patInfo").textContent = `${g.steps} steps · ${sp.label.split(" (")[0]}`;
+    const group = g.steps === 16 ? 4 : 3;
+    sep = (c, i) => { if(i > 0 && i % (g.steps/2) === 0) c.classList.add("half"); else if(i > 0 && i % group === 0) c.classList.add("gs"); };
+  } else {
+    const subName = S.sub > 1 ? " · " + SUBS.find(x => x.n === S.sub).label.toLowerCase() : "";
+    $("patInfo").textContent = `1 bar · ${S.beats} beat${S.beats === 1 ? "" : "s"}${subName}`;
+    sep = (c, i) => { if(g.spb > 1 && i > 0 && i % g.spb === 0) c.classList.add("half"); else if(g.spb === 1 && i > 0) c.classList.add("gs"); };
+  }
+  // Metronome row
+  $("metLane").classList.toggle("off", !S.metOn);
+  $("metToggle").classList.toggle("on", S.metOn); $("metToggle").setAttribute("aria-pressed", S.metOn);
+  $("patLane").classList.toggle("off", !S.patOn);
+  $("patToggle").classList.toggle("on", S.patOn); $("patToggle").setAttribute("aria-pressed", S.patOn);
+  const mbox = $("metCells"); mbox.innerHTML = "";
+  mbox.style.gridTemplateColumns = `repeat(${g.steps}, minmax(0,1fr))`;
+  for(let i=0;i<g.steps;i++){
+    const c = document.createElement("button");
+    c.className = "cell" + (met[i] ? " m" + met[i] : ""); sep(c, i);
+    c.setAttribute("aria-label", `Metronome step ${i+1}, ${["off","click","downbeat click"][met[i]]}`);
+    c.onclick = () => { const m = curMet().slice(); m[i] = (m[i] + 1) % 3; S[metKey()] = m; renderPattern(); save(); };
+    mbox.appendChild(c);
+  }
+  // Pattern row
+  const box = $("cells"); box.innerHTML = "";
+  if(!g.pattern) return;
+  const hits = curHits();
+  box.style.gridTemplateColumns = `repeat(${g.steps}, minmax(0,1fr))`;
+  for(let i=0;i<g.steps;i++){
+    const c = document.createElement("button");
+    c.className = "cell" + (hits.includes(i) ? " hit" : ""); sep(c, i);
+    c.setAttribute("aria-label", `Step ${i+1}${hits.includes(i) ? ", stroke" : ""}`);
+    c.onclick = () => {
+      const h = curHits().slice(); const at = h.indexOf(i);
+      at >= 0 ? h.splice(at,1) : h.push(i); h.sort((a,b)=>a-b);
+      S.hits = h.join() === PATTERNS[S.pattern].hits.join() ? null : h;
+      renderPattern(); save();
+    };
+    box.appendChild(c);
+  }
+}
+patSel.onchange = () => { const prev = curSpan(); S.pattern = patSel.value;
+  if(!curSpan()) applyMeter(METERS.find(m => m.id === (prev ? ({"2bar":"44in2","1bar":"44in2","dq":"68in2","e":"68in6"})[prev.id] : "44in2")) , true);
+  S.hits = null; S.met = null; renderSpanOptions(); applySpanMeter(); renderPattern(); save(); };
+$("span").onchange = e => { S.span = e.target.value; S.met = null; applySpanMeter(); renderPattern(); save(); };
+$("metToggle").onclick = () => { S.metOn = !S.metOn; renderPattern(); save(); };
+$("patToggle").onclick = () => { S.patOn = !S.patOn; renderPattern(); save(); };
+document.querySelectorAll("[data-met]").forEach(b => b.onclick = () => { S[metKey()] = defaultMet(b.dataset.met); renderPattern(); save(); });
+
+/* Tempo controls */
+$("bpm").oninput = e => setBpm(+e.target.value);
+$("bpmNum").onchange = e => setBpm(+e.target.value || S.bpm);
+$("minus").onclick = () => setBpm(S.bpm - 1);
+$("plus").onclick = () => setBpm(S.bpm + 1);
+let taps = [];
+function tap(){
+  const now = performance.now();
+  if(taps.length && now - taps[taps.length-1] > 2000) taps = [];
+  taps.push(now); if(taps.length > 7) taps.shift();
+  if(taps.length >= 2){
+    const iv = []; for(let i=1;i<taps.length;i++) iv.push(taps[i]-taps[i-1]);
+    setBpm(60000 / (iv.reduce((a,b)=>a+b,0)/iv.length));
+  }
+  const b = $("tap"); b.classList.add("hit"); setTimeout(() => b.classList.remove("hit"), 90);
+}
+$("tap").onclick = tap;
+
+/* Mix */
+[["vMaster","master"],["vBeat","beat"],["vPat","pat"]].forEach(([id,k]) => {
+  const el = $(id); el.value = S.vol[k]; $(id+"Out").textContent = S.vol[k];
+  el.oninput = () => { S.vol[k] = +el.value; $(id+"Out").textContent = el.value; if(master && k === "master") master.gain.setTargetAtTime((S.vol.master/100)**2, ctx.currentTime, 0.02); save(); };
+});
+
+/* Practice */
+function bindNum(id, obj, key, min, max){
+  const el = $(id); el.value = obj[key];
+  el.onchange = () => { let v = Math.round(+el.value); if(isNaN(v)) v = obj[key]; v = Math.min(max, Math.max(min, v)); obj[key] = v; el.value = v; renderTrainer(); save(); };
+}
+bindNum("trStep", S.tr, "step", -20, 20); bindNum("trEvery", S.tr, "every", 1, 64); bindNum("trTarget", S.tr, "target", 20, 300);
+bindNum("gapPlay", S.gap, "play", 1, 32); bindNum("gapMute", S.gap, "mute", 1, 32);
+$("trOn").checked = S.tr.on; $("trOn").onchange = e => { S.tr.on = e.target.checked; renderTrainer(); save(); };
+$("gapWhat").value = S.gap.what || "pattern"; $("gapWhat").onchange = e => { S.gap.what = e.target.value; save(); };
+$("gapOn").checked = S.gap.on; $("gapOn").onchange = e => { S.gap.on = e.target.checked; save(); };
+$("countIn").checked = S.countIn; $("countIn").onchange = e => { S.countIn = e.target.checked; save(); };
+
+/* Presets */
+const EXAMPLES = [
+  {name:"Salsa · Clave Tres Dos", ex:true, s:{bpm:90, beats:2, accents:[3,2], sub:2, sound:"cowbell", patSound:"clave", pattern:"tresdos", hits:null, span:"2bar"}},
+  {name:"Yambú · Clave de Yambú Matancera", ex:true, s:{bpm:44, beats:2, accents:[3,2], sub:2, sound:"wood", patSound:"clave", pattern:"yambu", hits:null, span:"2bar"}},
+  {name:"Abakuá · Campana de Abakuá", ex:true, s:{bpm:100, beats:2, accents:[3,2], sub:3, sound:"wood", patSound:"cowbell", pattern:"abakua", hits:null, span:"dq"}},
+];
+let presets = (store.get("madera.presets.v2", null) || EXAMPLES.slice()).filter(p => PATTERNS[p.s.pattern]);
+function renderPresets(){
+  const box = $("presetList"); box.innerHTML = "";
+  if(!presets.length){ box.innerHTML = '<p class="empty">No saved setups yet.</p>'; return; }
+  presets.forEach((p, i) => {
+    const d = document.createElement("div"); d.className = "preset";
+    const pat = PATTERNS[p.s.pattern]?.steps ? " · " + PATTERNS[p.s.pattern].name : "";
+    d.innerHTML = `<div><div>${p.name.replace(/[<>&]/g,"")}${p.ex ? ' <span class="hint">example</span>' : ""}</div><div class="meta">${p.s.bpm} BPM · ${p.s.beats} beats${pat}</div></div>`;
+    const btns = document.createElement("div");
+    const load = document.createElement("button"); load.textContent = "Load"; load.onclick = () => loadPreset(p.s);
+    const del = document.createElement("button"); del.textContent = "Delete"; del.onclick = () => { presets.splice(i,1); store.set("madera.presets.v2", presets); renderPresets(); };
+    btns.append(load, del); d.appendChild(btns); box.appendChild(d);
+  });
+}
+function loadPreset(s){
+  Object.assign(S, {met:null, freeMet:null, metOn:true, patOn:true, downSound:"click"}, structuredClone(s));
+  const sp = curSpan(); if(sp){ S.beats = sp.beats; S.accents = sp.accents.slice(); }
+  S.accents = S.accents.slice(0, S.beats);
+  renderAll(); save();
+}
+$("savePreset").onclick = () => {
+  const name = $("presetName").value.trim() || `${S.bpm} BPM · ${S.beats} beats`;
+  const {bpm,beats,accents,sub,unit,per,sound,downSound,patSound,pattern,hits,span,met,freeMet,metOn,patOn} = S;
+  presets.unshift({name, s:structuredClone({bpm,beats,accents,sub,unit,per,sound,downSound,patSound,pattern,hits,span,met,freeMet,metOn,patOn})});
+  store.set("madera.presets.v2", presets); $("presetName").value = ""; renderPresets();
+};
+$("presetName").onkeydown = e => { if(e.key === "Enter") $("savePreset").click(); };
+
+/* Keyboard */
+document.addEventListener("keydown", e => {
+  const tag = e.target.tagName;
+  if(tag === "INPUT" && e.target.type !== "range" && e.target.type !== "checkbox") return;
+  if(tag === "SELECT" || tag === "TEXTAREA" || e.metaKey || e.ctrlKey || e.altKey) return;
+  if(e.code === "Space"){ e.preventDefault(); running ? stop() : start(); }
+  else if(e.key === "ArrowUp"){ e.preventDefault(); setBpm(S.bpm + (e.shiftKey ? 5 : 1)); }
+  else if(e.key === "ArrowDown"){ e.preventDefault(); setBpm(S.bpm - (e.shiftKey ? 5 : 1)); }
+  else if(e.key === "t" || e.key === "T"){ tap(); }
+});
+
+function renderAll(){
+  if(!curSpan() && !METERS.some(m => m.beats === S.beats && m.unit === S.unit)) applyMeter(METERS[0], true);
+  if(![1,2,3,4,6].includes(S.sub)) S.sub = 2;
+  setBpm(S.bpm); renderPads(); refreshSubs(); refreshSounds(); refreshDownSounds(); refreshPatSounds();
+  renderSpanOptions(); renderPattern(); renderPresets(); renderTrainer();
+}
+renderAll();
+})();
+</script>

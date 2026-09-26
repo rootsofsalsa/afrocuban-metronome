@@ -1,0 +1,8 @@
+# macOS Finder files
+.DS_Store
+
+# Raw recordings (large WAV originals). Only the trimmed .m4a files in site/samples/ are saved.
+samples-raw/
+
+# Claude Code personal settings
+.claude/settings.local.json
