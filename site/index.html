@@ -1,1 +1,123 @@
-<!-- AfroCuban Metronome page. The prototype is ported here in Phase 1. -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AfroCuban Metronome</title>
+<meta name="description" content="Practice clave, campana and catá patterns over a step-grid metronome. An Afro-Cuban percussion trainer from Roots of Salsa.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">AfroCuban<small>METRONOME</small></div>
+    <div class="keys"><span><kbd>Space</kbd> start/stop</span><span><kbd>↑</kbd><kbd>↓</kbd> ±1 (<kbd>Shift</kbd> ±5)</span><span><kbd>T</kbd> tap</span></div>
+  </header>
+
+  <div class="grid">
+    <section class="transport" id="transport" aria-label="Transport">
+      <div class="tempo-row">
+        <button class="nudge" id="minus" aria-label="Slower">−</button>
+        <div class="bpm-wrap">
+          <output id="bpmOut" aria-live="polite">96</output>
+          <div class="bpm-meta"><span class="unit">BPM</span><span id="marking">per half note</span></div>
+        </div>
+        <button class="nudge" id="plus" aria-label="Faster">+</button>
+      </div>
+      <input type="range" id="bpm" min="20" max="300" value="96" aria-label="Tempo">
+      <div class="ctrls">
+        <button class="btn" id="tap">Tap tempo</button>
+        <button class="btn primary" id="play">Start</button>
+        <input type="number" id="bpmNum" min="20" max="300" value="96" aria-label="Exact tempo">
+      </div>
+      <div class="status">
+        <span>Bar <b id="barOut">0</b></span>
+        <span>Time <b id="timeOut">0:00</b></span>
+        <span id="stateOut"><span class="pill">Stopped</span></span>
+        <span id="trainerOut"></span>
+      </div>
+      <div class="patview" id="patview">
+        <h3><span id="patName">Grid</span><span id="patInfo">16 steps · 2 bars</span></h3>
+        <div class="lane" id="metLane">
+          <div class="lane-head">
+            <button class="mute on" id="metToggle" aria-pressed="true">Metronome</button>
+            <div class="lane-tools"><button class="mini" data-met="beats" title="Every beat of the time signature (the numerator)">Beats</button><button class="mini" data-met="down" title="Only where the BPM is measured">Downbeats</button><button class="mini" data-met="all">Every step</button><button class="mini" data-met="clear">Clear</button></div>
+          </div>
+          <div class="cells" id="metCells"></div>
+        </div>
+        <div class="lane" id="patLane">
+          <div class="lane-head"><button class="mute on" id="patToggle" aria-pressed="true"><span id="patLaneName">Pattern</span></button></div>
+          <div class="cells" id="cells"></div>
+        </div>
+        <p class="hint"><span class="key k2"></span> downbeat click <span class="key k1"></span> click <span class="key k0"></span> off. Click a metronome step to cycle it<span id="patHint">; click a pattern step to add or remove a stroke</span>.</p>
+      </div>
+    </section>
+
+    <div class="stack">
+      <section class="panel" aria-labelledby="h-meter">
+        <h2 id="h-meter">Meter &amp; subdivision</h2>
+        <div class="meter-sum" id="meterSum" hidden>
+          <span class="sig" id="sigOut">6/8</span>
+          <div><div id="sigNote">Counted in 2</div><div class="hint" id="sigSub">BPM = dotted quarter note</div></div>
+        </div>
+        <p class="hint" id="gridNote" hidden>The meter follows the pattern's "One cycle" setting. Set clicks on the metronome row.</p>
+        <div id="freeMeter">
+        <div class="row" id="meters"><span class="lbl">Time</span></div>
+        <div class="row" id="subs"><span class="lbl">Subdivide</span></div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-clave">
+        <h2 id="h-clave">Clave, campana &amp; catá</h2>
+        <div class="row"><span class="lbl">Pattern</span>
+          <select id="pattern" aria-label="Pattern"></select>
+        </div>
+        <div class="row"><span class="lbl">One cycle</span>
+          <select id="span" aria-label="Pattern span"></select>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-sound">
+        <h2 id="h-sound">Sound &amp; mix</h2>
+        <div class="row" id="sounds"><span class="lbl">Click</span></div>
+        <div class="row" id="downSounds"><span class="lbl">Downbeat click</span></div>
+        <div class="row" id="patSounds"><span class="lbl">Pattern</span></div>
+        <div class="slider"><span>Master</span><input type="range" id="vMaster" min="0" max="100" value="80"><output id="vMasterOut">80</output></div>
+        <div class="slider"><span>Clicks</span><input type="range" id="vBeat" min="0" max="100" value="85"><output id="vBeatOut">85</output></div>
+        <div class="slider"><span>Pattern</span><input type="range" id="vPat" min="0" max="100" value="80"><output id="vPatOut">80</output></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-practice">
+        <h2 id="h-practice">Practice tools</h2>
+        <div class="sub">
+          <label class="sw"><input type="checkbox" id="trOn"> <b>Speed trainer</b></label>
+          <div class="row">Change by <input type="number" id="trStep" value="2" min="-20" max="20"> BPM every <input type="number" id="trEvery" value="4" min="1" max="64"> bars until <input type="number" id="trTarget" value="140" min="20" max="300"></div>
+        </div>
+        <div class="sub">
+          <label class="sw"><input type="checkbox" id="gapOn"> <b>Listen, then play</b> <span class="hint">silent sections for ear training</span></label>
+          <div class="row">Silence <select id="gapWhat" aria-label="What goes silent">
+            <option value="pattern">the pattern only (you play it)</option>
+            <option value="clicks">the metronome only</option>
+            <option value="all">everything</option>
+          </select></div>
+          <div class="row sentence">Play <input type="number" id="gapPlay" value="2" min="1" max="32"> <span class="gapUnit">cycles</span>, then silence <input type="number" id="gapMute" value="2" min="1" max="32"> <span class="gapUnit">cycles</span></div>
+          <p class="hint" id="gapHint"></p>
+        </div>
+        <label class="sw"><input type="checkbox" id="countIn"> Count in one bar before patterns and trainers start</label>
+      </section>
+
+      <section class="panel" aria-labelledby="h-presets">
+        <h2 id="h-presets">Saved setups</h2>
+        <div class="row"><input type="text" id="presetName" placeholder="e.g. Yambú 84"><button class="btn" id="savePreset">Save</button></div>
+        <div class="presets" id="presetList"></div>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>
