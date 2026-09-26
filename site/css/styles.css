@@ -35,9 +35,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font
 .brand{display:flex;align-items:center;gap:20px}
 /* The logo file is 1045 units wide around a 933-unit mark, so a 180px image draws the mark at 161px
    (brand book: 160px for full detail). Its built-in margin plus the gap covers the 7% clear space. */
-.logo{display:block;flex:none;width:180px;height:180px}
-/* Only the colour mark is supplied, and it must sit on a light ground, so dark mode gives it a cream plate. */
-@media (prefers-color-scheme: dark){.logo{box-sizing:content-box;padding:4px;border-radius:20px;background:var(--brand-cream)}}
+/* Dark mode shows the white knockout straight on the ink-brown ground (brand book §6); see the <picture> in index.html. */
+.brand picture{flex:none}
+.logo{display:block;width:180px;height:180px}
 h1{margin:0;font-family:var(--display);font-weight:600;font-size:clamp(26px,3.2vw,36px);line-height:1.1;letter-spacing:-.01em}
 h1 span{display:block}
 .keys{font-size:12.5px;color:var(--muted);display:flex;gap:6px 14px;flex-wrap:wrap}
