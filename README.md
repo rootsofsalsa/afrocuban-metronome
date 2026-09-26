@@ -79,3 +79,9 @@ Follow the naming convention and recording checklist in `site/samples/README.md`
 ## Deploy
 
 Not deployed yet. The plan is GitHub Pages at metronome.rootsofsalsa.com, deployed by a GitHub Actions workflow on every push to `main`. See "Later: migrate to GitHub and GitHub Pages" in `docs/BUILD_BRIEF_v1.md`.
+
+## Copyright
+
+© 2026 Vincent Alexander Emanuele II d/b/a Roots of Salsa. All rights reserved.
+
+The site shows the short form, "© 2026 Roots of Salsa. All rights reserved.", in its footer.

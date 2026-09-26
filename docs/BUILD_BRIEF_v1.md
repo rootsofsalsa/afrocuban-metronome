@@ -111,6 +111,7 @@ Work through the phases in order. At the end of each phase, stop, summarize what
 ### Step A: Push to GitHub and deploy to metronome.rootsofsalsa.com
 
 0. Create the GitHub repo in the owner's `rootsofsalsa` organization, add it as the remote, and push the existing local history. Nothing is lost; all local commits carry over.
+   Before the first push, add a `LICENSE` file: "© 2026 Vincent Alexander Emanuele II d/b/a Roots of Salsa. All rights reserved." GitHub Pages on a free organization needs a public repo, so the code will be visible; the license makes clear it isn't free to reuse (suggested in Phase 4; confirm with the owner at this step).
 
 1. Create `.github/workflows/pages.yml` using the official GitHub Pages actions. It triggers on push to `main` and runs the test job, then uploads `site/` as the Pages artifact and deploys it.
 2. Walk the owner through these steps. They're done in the browser and DNS, not in code:
