@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Temporary favicon in the prototype's colors: three grid cells (downbeat, off, click).
-       Replaced with a brand icon in Phase 1b. -->
-  <rect width="32" height="32" rx="7" fill="#2C47D0"/>
-  <rect x="6" y="10" width="5" height="12" rx="1.5" fill="#FFFFFF"/>
-  <rect x="13.5" y="10" width="5" height="12" rx="1.5" fill="#FFFFFF" fill-opacity=".4"/>
-  <rect x="21" y="10" width="5" height="12" rx="1.5" fill="#FFFFFF" fill-opacity=".75"/>
+  <!-- Brand colours, not the Roots of Salsa mark, because the brand book sets the mark's screen floor
+       at 96px. Three grid cells in teal, cream and orange. Replace with a small-size mark if one is made. -->
+  <rect width="32" height="32" rx="7" fill="#2A1210"/>
+  <rect x="6" y="10" width="5" height="12" rx="1.5" fill="#49A67C"/>
+  <rect x="13.5" y="10" width="5" height="12" rx="1.5" fill="#F6F0DA" fill-opacity=".35"/>
+  <rect x="21" y="10" width="5" height="12" rx="1.5" fill="#EE9440"/>
 </svg>
