@@ -24,6 +24,8 @@ Then open `http://<Mac's local IP>:8000` on the phone. To find the Mac's IP, go 
 
 ### Testing on an iPhone
 
+Last checked on an iPhone 16 Pro Max with iOS 26.6.2 (26 September 2026). Everything below passed, including 5 minutes in time on Catá Habanero with silent mode on.
+
 - **Silent switch:** the metronome should play with the ring/silent switch on. Safari 16.4 and newer supports this directly; older iPhones fall back to a silent looping sound that does the same job.
 - **Screen staying awake:** this needs HTTPS, so it can't work over the Wi-Fi address. For a long test, set Settings → Display & Brightness → Auto-Lock to Never, and set it back afterwards.
 - **Leaving Safari:** on a phone, the metronome stops when you switch apps or lock the screen, because the phone can't keep it in time in the background. Tap Start when you're back. If another app (Spotify, a call) used the sound meanwhile, Start sets the sound up again, so no refresh is needed.
