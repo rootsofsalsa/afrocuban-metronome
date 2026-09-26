@@ -143,6 +143,7 @@ input[type=number]{width:76px;font-variant-numeric:tabular-nums}
   .mini{padding-inline:8px}
   .preset button{min-width:40px}
   input[type=range]{height:40px}
+  .keys{display:none}   /* the keyboard shortcuts legend: phones and tablets have no keyboard to use it with */
 }
 /* 144px draws the mark at 129px: the brand book's "acceptable" screen size.
    Narrower side padding in the panels gives the grid room for two rows of eight 40px cells, down to 375px screens. */
