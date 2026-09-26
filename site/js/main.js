@@ -32,7 +32,17 @@ async function start(){
   scheduler.start(S, setBpm);
   $("play").textContent = "Stop"; $("play").classList.add("on");
   requestAnimationFrame(draw);
-  try{ wake = await navigator.wakeLock?.request("screen"); }catch(e){ wake = null; }
+  keepAwake();
+}
+// Keep the screen on while playing. Only works over HTTPS or on localhost, and the phone may refuse
+// (low battery mode, for example), so a refusal is simply ignored.
+async function keepAwake(){
+  if(wake || !navigator.wakeLock) return;
+  try{
+    const lock = await navigator.wakeLock.request("screen");
+    if(scheduler.isRunning()){ wake = lock; lock.addEventListener("release", () => { if(wake === lock) wake = null; }); }
+    else lock.release().catch(() => {});   // Stop was tapped while the request was pending
+  }catch(e){}
 }
 function stop(){
   scheduler.stop();
@@ -41,13 +51,16 @@ function stop(){
   document.querySelectorAll(".cell.now").forEach(e => e.classList.remove("now"));
   $("stateOut").innerHTML = '<span class="pill">Stopped</span>';
   $("patLane").classList.remove("silent");
-  try{ wake?.release(); }catch(e){} wake = null;
+  wake?.release().catch(() => {}); wake = null;
 }
 const toggle = () => scheduler.isRunning() ? stop() : start();
 $("play").onclick = toggle;
 // Coming back to the page: iPhone suspends audio for calls, Siri and app switches, so wake it up again.
+// The browser also drops the screen wake lock whenever the page is hidden, so ask for it again.
 document.addEventListener("visibilitychange", () => {
-  if(document.visibilityState === "visible") resumeAudio();
+  if(document.visibilityState !== "visible") return;
+  resumeAudio();
+  if(scheduler.isRunning()) keepAwake();
 });
 
 /* ---------- Visuals ---------- */
