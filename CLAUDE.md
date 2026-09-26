@@ -83,6 +83,10 @@ Steps are 0-based. `x` = stroke, `.` = rest, `|` = barline.
 - Audio uses the Web Audio API with a lookahead scheduler (timer every 25 ms, scheduling 120 ms ahead). Never schedule sound with `setTimeout` timing.
 - **Phones (owner-confirmed after testing on an iPhone, Phase 3):** the page uses the "playback" audio session, so it plays with the silent switch on and pauses other apps' audio (Spotify) when Start is tapped. That is the desired behavior. On touch screens the metronome stops when the page goes to the background, because the phone can't keep it in time there; the owner chose stopping over trying to play on. Keep both. Verified on the owner's iPhone 16 Pro Max, iOS 26.6.2 (2026-09-26). That iOS has the Audio Session API, so the silent `<audio>` fallback for iOS before 16.4 hasn't been tested on a real phone.
 - **Samples:** load recorded one-shots from `site/samples/` when present, and fall back to the synthesized voices. A stroke must not cut off the previous stroke of the same instrument abruptly; use a short fade (choke) when a new stroke starts.
+  - Files (owner): `clave-main-N.m4a`, `campana-main-N.m4a`, and `cata-right-N`, `cata-left-N`, `cata-flam-N.m4a`. Catá plays the recording for each stroke's hand from the sticking. Naming lives in `site/js/samples.js` and `site/samples/README.md`.
+  - Only the pattern sounds (Clave, Campana, Catá) use recordings. The metronome click sounds are Click, Woodblock, Rim and Beep, always synthesized; never offer the instruments as click sounds (owner).
+  - The synthesized catá stand-in plays a flam as one ordinary stroke. Don't try to synthesize a flam (owner).
+  - Later, not in v1 (owner): once the recordings have proven reliable with students for a while, remove the synthesized pattern sounds altogether. Discuss with the owner first.
 - Pattern definitions live in one data file (`site/js/patterns.js`). Adding a pattern should only mean editing that file.
 - Later (not now): deploy through a GitHub Actions workflow on every push to `main`.
 

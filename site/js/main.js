@@ -3,7 +3,7 @@ import { PATTERNS, SPANS } from "./patterns.js";
 import { METERS, SUBS, SPAN_TO_METER } from "./meters.js";
 import { gridInfo, defaultMet, curSpan, curHits, curMet, metKey, gapBarsPerUnit, rowLength } from "./grid.js";
 import { store, KEYS } from "./storage.js";
-import { CLICK_SOUNDS, PATTERN_SOUNDS, ctx, unlockAudio, pauseKeepAlive, resumeAudio, setMasterVolume, voice } from "./audio.js";
+import { CLICK_SOUNDS, PATTERN_SOUNDS, ctx, unlockAudio, pauseKeepAlive, resumeAudio, setMasterVolume, voice, loadSamples } from "./audio.js";
 import * as scheduler from "./scheduler.js";
 
 const $ = id => document.getElementById(id);
@@ -340,3 +340,4 @@ function renderAll(){
   renderSpanOptions(); renderPattern(); renderPresets(); renderTrainer();
 }
 renderAll();
+loadSamples();   // recordings in site/samples/, if any; the synthesized voices play until (and unless) they arrive

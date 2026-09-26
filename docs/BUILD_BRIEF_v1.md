@@ -146,5 +146,6 @@ Give the owner copy-paste instructions for Squarespace:
 - Hiding strokes during "Your turn"
 - An iPhone App Store version
 - Analytics
+- Removing the synthesized pattern sounds, once the owner and students have used the recordings long enough to trust them (owner's plan, noted in Phase 4)
 
 Suggest these when relevant, but don't build them until asked.

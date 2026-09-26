@@ -2,7 +2,7 @@
 // A timer wakes every 25 ms and schedules every beat that starts within the next 120 ms on the
 // audio clock, so timing never depends on setTimeout accuracy.
 import { ctx, voice } from "./audio.js";
-import { gridInfo, curMet, curHits, gapBarsPerUnit } from "./grid.js";
+import { gridInfo, curMet, curHits, gapBarsPerUnit, strokeAt } from "./grid.js";
 
 const LOOK = 0.12, TICK = 25;
 let S = null, onTrainerStep = null;
@@ -66,7 +66,7 @@ function scheduleBeat(t){
         if(met[step] === 2) voice(S.downSound, st, bv, "accent");
         else if(met[step] === 1) voice(S.sound, st, bv*0.62, "beat");
       }
-      if(g.pattern && S.patOn && !mutePat && hits.includes(step)) voice(S.patSound, st, pv, "accent");
+      if(g.pattern && S.patOn && !mutePat && hits.includes(step)) voice(S.patSound, st, pv, "accent", strokeAt(S, step));
       queue.push({t:st, kind:"p", step});
     }
   }

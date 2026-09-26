@@ -55,7 +55,8 @@ If a test fails, the app has drifted from the owner's musical rules. Fix the app
 | `site/js/patterns.js` | Every pattern: name, step count, hit positions. The single source of truth. |
 | `site/js/meters.js` | Free-mode meters and subdivisions |
 | `site/js/grid.js` | Metronome-row defaults and quick fills |
-| `site/js/audio.js` | Sounds: synthesized voices, later recorded samples |
+| `site/js/audio.js` | Sounds: recorded samples when present, synthesized voices otherwise; audio unlock on phones |
+| `site/js/samples.js` | Which recording files the app looks for, and which one plays for each stroke |
 | `site/js/scheduler.js` | Timing: lookahead scheduler, count-in, listen-then-play, speed trainer |
 | `site/js/storage.js` | Saved settings and setups (localStorage) |
 | `site/js/main.js` | Wires the page controls to everything above |
@@ -73,7 +74,7 @@ Also add the pattern to the table in `CLAUDE.md` and to the `CANON` list in `tes
 
 ## Add recorded samples
 
-Follow the naming convention and recording checklist in `site/samples/README.md`. Keep raw WAV recordings in `samples-raw/`; git ignores that folder. The sample-ready audio engine arrives in Phase 4 of the build brief. Until then, the app uses synthesized sounds.
+Follow the naming convention and recording checklist in `site/samples/README.md`. Put the converted `.m4a` files in `site/samples/` and reload the page: the pattern sounds (Clave, Campana, Catá) switch to the recordings, with no code changes. Remove a file and that sound goes back to its synthesized version. The metronome clicks are always synthesized. Keep raw WAV recordings in `samples-raw/`; git ignores that folder.
 
 ## Deploy
 

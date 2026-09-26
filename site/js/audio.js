@@ -1,4 +1,5 @@
-// AudioContext, unlocking audio on phones, and synthesized voices. Sample loading and choke come in Phase 4.
+// AudioContext, unlocking audio on phones, recorded samples (with choke) and synthesized voices.
+import { SAMPLE_STROKES, MAX_TAKES, sampleFile, sampleKey } from "./samples.js";
 
 // Metronome click sounds: always synthesized. The instruments are never click sounds (owner's choice).
 export const CLICK_SOUNDS = [{id:"click",label:"Click"},{id:"wood",label:"Woodblock"},{id:"stick",label:"Rim"},{id:"beep",label:"Beep"}];
@@ -14,6 +15,7 @@ let master = null, noise = null;
 export function initAudio(masterVol){
   if(ctx) return;
   ctx = new (window.AudioContext || window.webkitAudioContext)({latencyHint:"interactive"});
+  lastStroke = {};
   master = ctx.createGain(); master.gain.value = (masterVol/100)**2;
   const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -6; comp.ratio.value = 4;
   master.connect(comp).connect(ctx.destination);
@@ -66,6 +68,57 @@ function silentWav(rate){
   return URL.createObjectURL(new Blob([d], {type:"audio/wav"}));
 }
 
+/* ---------- Recorded samples ---------- */
+// Decoded once and kept: "clave-main" -> [one AudioBuffer per take]. Stays empty until recordings exist.
+const samples = {};
+const turn = {};           // the take played last, per recording, so takes rotate
+let lastStroke = {};       // the latest recorded stroke per instrument, for the choke
+const CHOKE = 0.015;       // seconds
+
+// Look for recordings in site/samples/ and decode them once. Runs at page load with an offline audio
+// context, which needs no tap, so the first stroke is already the recording. Missing files are skipped quietly.
+export async function loadSamples(){
+  const Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  if(!Offline) return;
+  const decoder = new Offline(1, 1, 48000);
+  await Promise.all(Object.entries(SAMPLE_STROKES).flatMap(([inst, strokes]) => strokes.map(async stroke => {
+    const takes = [];
+    for(let n = 1; n <= MAX_TAKES; n++){
+      const buf = await fetchSample(decoder, sampleFile(inst, stroke, n));
+      if(!buf) break;
+      takes.push(buf);
+    }
+    if(takes.length) samples[`${inst}-${stroke}`] = takes;
+  })));
+}
+async function fetchSample(decoder, file){
+  try{
+    const r = await fetch("samples/" + file);
+    return r.ok ? await decoder.decodeAudioData(await r.arrayBuffer()) : null;
+  }catch(e){ return null; }
+}
+
+// Which recordings were found and how many takes each, e.g. {"clave-main": 5}.
+export const loadedSamples = () => Object.fromEntries(Object.entries(samples).map(([k, v]) => [k, v.length]));
+
+// Play one recorded stroke at audio time t. Takes rotate, so repeats sound less mechanical. Choke: the
+// previous stroke of the same instrument fades out over 15 ms as this one starts, instead of ringing
+// on under it or stopping dead.
+function playSample(inst, key, t, gain){
+  const takes = samples[key], n = turn[key] = ((turn[key] ?? -1) + 1) % takes.length;
+  const src = ctx.createBufferSource(), g = ctx.createGain();
+  src.buffer = takes[n]; g.gain.value = gain;
+  src.connect(g).connect(master);
+  const prev = lastStroke[inst];
+  if(prev && prev.end > t){
+    prev.g.gain.setValueAtTime(prev.gain, t);
+    prev.g.gain.linearRampToValueAtTime(0, t + CHOKE);
+    prev.src.stop(t + CHOKE);
+  }
+  src.start(t);
+  lastStroke[inst] = {src, g, gain, end: t + src.buffer.duration};
+}
+
 export function setMasterVolume(vol){
   if(master) master.gain.setTargetAtTime((vol/100)**2, ctx.currentTime, 0.02);
 }
@@ -80,8 +133,11 @@ function osc(type, f, t, dur, dest){ const o = ctx.createOscillator(); o.type = 
 function burst(t, dur, dest){ const s = ctx.createBufferSource(); s.buffer = noise; s.connect(dest); s.start(t); s.stop(t+dur+0.02); }
 
 // Play one stroke of a voice at audio time t. role: "accent", "beat" or anything else (softest).
-export function voice(kind, t, gain, role){
+// hand: "R", "L" or "F" for a catá stroke. The recording plays if there is one, otherwise the synthesized voice.
+export function voice(kind, t, gain, role, hand){
   if(gain <= 0.001) return;
+  const key = sampleKey(kind, hand);
+  if(key && samples[key]) return playSample(kind, key, t, gain);
   const g = ctx.createGain(); g.connect(master);
   const R = (a,b,c) => role === "accent" ? a : role === "beat" ? b : c;
   switch(kind){
