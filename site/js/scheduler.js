@@ -92,5 +92,8 @@ function scheduleBeat(t){
 }
 
 function loop(){
+  // The phone paused our timer (page in the background, a busy moment): skip the missed beats and carry on
+  // from now, instead of playing them all at once.
+  if(ctx.currentTime - nextT > 0.25) nextT = ctx.currentTime + 0.05;
   while(nextT < ctx.currentTime + LOOK) scheduleBeat(nextT);
 }
