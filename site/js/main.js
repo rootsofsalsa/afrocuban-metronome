@@ -7,6 +7,8 @@ import { SOUNDS, ctx, unlockAudio, pauseKeepAlive, resumeAudio, setMasterVolume,
 import * as scheduler from "./scheduler.js";
 
 const $ = id => document.getElementById(id);
+// A touch screen (phone or tablet): bigger tap areas, and the metronome stops when the page goes to the background.
+const coarse = matchMedia("(pointer: coarse)");
 
 /* ---------- State ---------- */
 const DEFAULT = {
@@ -56,10 +58,17 @@ function stop(){
 }
 const toggle = () => scheduler.isRunning() ? stop() : start();
 $("play").onclick = toggle;
-// Coming back to the page: iPhone suspends audio for calls, Siri and app switches, so wake it up again.
-// The browser also drops the screen wake lock whenever the page is hidden, so ask for it again.
+// Leaving the page on a phone stops the metronome: in the background the phone only lets our timer run
+// now and then, so the clicks would drift out of time (owner's choice: stop, then tap Start when back).
+// On a computer it keeps playing in a background tab, as before.
+// Coming back: wake suspended audio, and ask again for the screen wake lock, which the browser drops
+// whenever the page is hidden.
 document.addEventListener("visibilitychange", () => {
-  if(document.visibilityState === "hidden"){ away = true; return; }
+  if(document.visibilityState === "hidden"){
+    away = true;
+    if(coarse.matches && scheduler.isRunning()) stop();
+    return;
+  }
   resumeAudio();
   if(scheduler.isRunning()) keepAwake();
 });
@@ -211,7 +220,6 @@ function renderPattern(){
 }
 // How many grid cells fit across. On a touch screen each cell's tap area (the cell plus the 6px gap)
 // must be at least 40px wide; with a mouse, 24px is enough.
-const coarse = matchMedia("(pointer: coarse)");
 function cellsAcross(){
   return Math.max(1, Math.floor(($("metCells").clientWidth + 6) / (coarse.matches ? 40 : 24)));
 }

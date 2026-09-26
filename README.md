@@ -26,7 +26,8 @@ Then open `http://<Mac's local IP>:8000` on the phone. To find the Mac's IP, go 
 
 - **Silent switch:** the metronome should play with the ring/silent switch on. Safari 16.4 and newer supports this directly; older iPhones fall back to a silent looping sound that does the same job.
 - **Screen staying awake:** this needs HTTPS, so it can't work over the Wi-Fi address. For a long test, set Settings → Display & Brightness → Auto-Lock to Never, and set it back afterwards.
-- **Coming back:** after a call, Siri or switching apps, the sound should come back when you return to Safari. If it doesn't, tap Stop and Start.
+- **Leaving Safari:** on a phone, the metronome stops when you switch apps or lock the screen, because the phone can't keep it in time in the background. Tap Start when you're back. If another app (Spotify, a call) used the sound meanwhile, Start sets the sound up again, so no refresh is needed.
+- **Other apps' audio:** tapping Start pauses music playing in other apps, such as Spotify.
 - **Grid:** on a phone, 16-step patterns wrap into two rows of eight at the barline, and 12-step patterns into two rows of six.
 
 The page won't work if you double-click `site/index.html`, because browsers don't load JavaScript modules from `file://`. Always use the server.
