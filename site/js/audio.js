@@ -1,6 +1,9 @@
 // AudioContext, unlocking audio on phones, and synthesized voices. Sample loading and choke come in Phase 4.
 
-export const SOUNDS = [{id:"click",label:"Click"},{id:"wood",label:"Woodblock"},{id:"clave",label:"Clave"},{id:"cowbell",label:"Cowbell"},{id:"stick",label:"Rim"},{id:"beep",label:"Beep"}];
+// Metronome click sounds: always synthesized. The instruments are never click sounds (owner's choice).
+export const CLICK_SOUNDS = [{id:"click",label:"Click"},{id:"wood",label:"Woodblock"},{id:"stick",label:"Rim"},{id:"beep",label:"Beep"}];
+// Pattern sounds: the instruments, synthesized until recordings exist.
+export const PATTERN_SOUNDS = [{id:"clave",label:"Clave"},{id:"campana",label:"Campana"},{id:"cata",label:"Catá"}];
 
 // ctx is created on the first Start or sound preview (browsers only allow audio after a user gesture).
 // Importers see it update, because ES module exports are live bindings.
@@ -93,10 +96,18 @@ export function voice(kind, t, gain, role){
     }
     case "clave": { env(g,t,gain*0.75,R(0.14,0.12,0.08)); osc("sine",R(2750,2500,2250),t,0.15,g);
       const ng = ctx.createGain(); const hp = ctx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=3000; ng.connect(hp).connect(master); env(ng,t,gain*0.15,0.008); burst(t,0.01,ng); break; }
-    case "cowbell": {
+    case "campana": {
       const bp = ctx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=1100; bp.Q.value=1.2; bp.connect(g);
       env(g,t,gain*0.5,R(0.38,0.22,0.08));
       osc("square",562,t,0.4,bp); osc("square",845,t,0.4,bp); break;
+    }
+    case "cata": {   // stand-in until recorded: a hollow wooden tok with a stick attack. A flam plays as one stroke.
+      const bp = ctx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=700; bp.Q.value=4; bp.connect(g);
+      env(g,t,gain*1.6,0.09);
+      const o = osc("sine",640,t,0.1,bp); o.frequency.exponentialRampToValueAtTime(560,t+0.06);
+      const ng = ctx.createGain(); const sb = ctx.createBiquadFilter(); sb.type="bandpass"; sb.frequency.value=2800; sb.Q.value=1.5;
+      ng.connect(sb).connect(master); env(ng,t,gain*0.35,0.015); burst(t,0.02,ng);
+      break;
     }
     case "stick": {
       const hp = ctx.createBiquadFilter(); hp.type="bandpass"; hp.frequency.value=R(4200,3600,3000); hp.Q.value=2; hp.connect(g);

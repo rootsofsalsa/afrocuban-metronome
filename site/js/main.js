@@ -3,7 +3,7 @@ import { PATTERNS, SPANS } from "./patterns.js";
 import { METERS, SUBS, SPAN_TO_METER } from "./meters.js";
 import { gridInfo, defaultMet, curSpan, curHits, curMet, metKey, gapBarsPerUnit, rowLength } from "./grid.js";
 import { store, KEYS } from "./storage.js";
-import { SOUNDS, ctx, unlockAudio, pauseKeepAlive, resumeAudio, setMasterVolume, voice } from "./audio.js";
+import { CLICK_SOUNDS, PATTERN_SOUNDS, ctx, unlockAudio, pauseKeepAlive, resumeAudio, setMasterVolume, voice } from "./audio.js";
 import * as scheduler from "./scheduler.js";
 
 const $ = id => document.getElementById(id);
@@ -22,7 +22,17 @@ const DEFAULT = {
 const S = Object.assign(structuredClone(DEFAULT), store.get(KEYS.state, {}));
 S.vol = Object.assign({}, DEFAULT.vol, S.vol); S.tr = Object.assign({}, DEFAULT.tr, S.tr); S.gap = Object.assign({}, DEFAULT.gap, S.gap);
 if(!PATTERNS[S.pattern]){ S.pattern = "none"; S.hits = null; }
+fixSounds(S);
 const save = () => store.set(KEYS.state, S);
+
+// Phase 4 changed the sound lists: Cowbell became Campana, and the instruments are no longer click sounds.
+// Settings and setups saved before that are brought up to date here.
+function fixSounds(s){
+  if(!CLICK_SOUNDS.some(x => x.id === s.sound)) s.sound = DEFAULT.sound;
+  if(!CLICK_SOUNDS.some(x => x.id === s.downSound)) s.downSound = DEFAULT.downSound;
+  if(s.patSound === "cowbell") s.patSound = "campana";
+  if(!PATTERN_SOUNDS.some(x => x.id === s.patSound)) s.patSound = PATTERNS[s.pattern]?.instrument || DEFAULT.patSound;
+}
 
 /* ---------- Transport ---------- */
 // away: the page has been in the background since sound last started, so another app may have taken the audio.
@@ -134,9 +144,9 @@ function chips(boxId, items, getOn, onPick){
 function applyMeter(m, withSub){ S.unit = m.unit; S.per = m.per; if(withSub){ S.sub = m.sub; refreshSubs(); } setBeats(m.beats, m.acc); }
 chips("meters", METERS, () => false, m => applyMeter(m, true));
 const refreshSubs = chips("subs", SUBS, it => it.n === S.sub, it => { S.sub = it.n; S.freeMet = null; refreshSubs(); renderPattern(); save(); });
-const refreshSounds = chips("sounds", SOUNDS, it => it.id === S.sound, it => { S.sound = it.id; refreshSounds(); save(); preview(it.id); });
-const refreshDownSounds = chips("downSounds", SOUNDS, it => it.id === S.downSound, it => { S.downSound = it.id; refreshDownSounds(); save(); preview(it.id); });
-const refreshPatSounds = chips("patSounds", SOUNDS, it => it.id === S.patSound, it => { S.patSound = it.id; refreshPatSounds(); save(); preview(it.id); });
+const refreshSounds = chips("sounds", CLICK_SOUNDS, it => it.id === S.sound, it => { S.sound = it.id; refreshSounds(); save(); preview(it.id); });
+const refreshDownSounds = chips("downSounds", CLICK_SOUNDS, it => it.id === S.downSound, it => { S.downSound = it.id; refreshDownSounds(); save(); preview(it.id); });
+const refreshPatSounds = chips("patSounds", PATTERN_SOUNDS, it => it.id === S.patSound, it => { S.patSound = it.id; refreshPatSounds(); save(); preview(it.id); });
 function preview(kind){ if(scheduler.isRunning()) return; unlockAudio(S.vol.master, away); away = false; voice(kind, ctx.currentTime + 0.02, (S.vol.beat/100)**2, "accent"); }
 
 /* Pattern UI */
@@ -228,6 +238,8 @@ let across = 0;
 new ResizeObserver(() => { const n = cellsAcross(); if(n !== across){ across = n; renderPattern(); } }).observe($("metCells"));
 
 patSel.onchange = () => { const prev = curSpan(S); S.pattern = patSel.value;
+  // Choosing a pattern picks its instrument as the pattern sound; the user can still change it.
+  const inst = PATTERNS[S.pattern].instrument; if(inst){ S.patSound = inst; refreshPatSounds(); }
   if(!curSpan(S)) applyMeter(METERS.find(m => m.id === (prev ? SPAN_TO_METER[prev.id] : "44in2")), true);
   S.hits = null; S.met = null; renderSpanOptions(); applySpanMeter(); renderPattern(); save(); };
 $("span").onchange = e => { S.span = e.target.value; S.met = null; applySpanMeter(); renderPattern(); save(); };
@@ -273,9 +285,9 @@ $("countIn").checked = S.countIn; $("countIn").onchange = e => { S.countIn = e.t
 
 /* Presets */
 const EXAMPLES = [
-  {name:"Salsa · Clave Tres Dos", ex:true, s:{bpm:90, beats:2, accents:[3,2], sub:2, sound:"cowbell", patSound:"clave", pattern:"tresdos", hits:null, span:"2bar"}},
+  {name:"Salsa · Clave Tres Dos", ex:true, s:{bpm:90, beats:2, accents:[3,2], sub:2, sound:"wood", patSound:"clave", pattern:"tresdos", hits:null, span:"2bar"}},
   {name:"Yambú · Clave de Yambú Matancera", ex:true, s:{bpm:44, beats:2, accents:[3,2], sub:2, sound:"wood", patSound:"clave", pattern:"yambu", hits:null, span:"2bar"}},
-  {name:"Abakuá · Campana de Abakuá", ex:true, s:{bpm:100, beats:2, accents:[3,2], sub:3, sound:"wood", patSound:"cowbell", pattern:"abakua", hits:null, span:"dq"}},
+  {name:"Abakuá · Campana de Abakuá", ex:true, s:{bpm:100, beats:2, accents:[3,2], sub:3, sound:"wood", patSound:"campana", pattern:"abakua", hits:null, span:"dq"}},
 ];
 let presets = (store.get(KEYS.presets, null) || EXAMPLES.slice()).filter(p => PATTERNS[p.s.pattern]);
 function renderPresets(){
@@ -297,6 +309,7 @@ function renderPresets(){
 }
 function loadPreset(s){
   Object.assign(S, {met:null, freeMet:null, metOn:true, patOn:true, downSound:"click"}, structuredClone(s));
+  fixSounds(S);
   const sp = curSpan(S); if(sp){ S.beats = sp.beats; S.accents = sp.accents.slice(); }
   S.accents = S.accents.slice(0, S.beats);
   renderAll(); save();
