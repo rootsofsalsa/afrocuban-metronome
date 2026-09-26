@@ -14,9 +14,10 @@ export function curSpan(s){
 export function gridInfo(s){
   const sp = curSpan(s);
   // spb = steps per BPM beat (where tempo is measured); num = steps per numerator beat of the time signature
-  if(sp) return {steps:PATTERNS[s.pattern].steps, spb:sp.spb, num:sp.num, beats:sp.beats, pattern:true};
+  // main = steps per main pulse, two per bar: half notes in 4/4, dotted quarters in 6/8
+  if(sp) return {steps:PATTERNS[s.pattern].steps, spb:sp.spb, num:sp.num, main:sp.spb*sp.beats/2, beats:sp.beats, pattern:true};
   const per = s.per || 1, num = s.sub % per === 0 ? s.sub / per : s.sub;
-  return {steps:s.beats*s.sub, spb:s.sub, num, beats:s.beats, pattern:false};
+  return {steps:s.beats*s.sub, spb:s.sub, num, main:s.sub*s.beats/2, beats:s.beats, pattern:false};
 }
 
 // Metronome row: 0 = off, 1 = click, 2 = downbeat click.
@@ -25,8 +26,9 @@ export function defaultMet(mode, g){
   return Array.from({length:g.steps}, (_, i) => {
     if(mode === "clear") return 0;
     const onPulse = i % g.spb === 0;            // where BPM is measured
-    if(mode === "down") return onPulse ? 2 : 0;
-    if(mode === "all") return onPulse ? 2 : 1;
+    const onMain = i % g.main === 0;            // the two main pulses of each bar
+    if(mode === "down") return onMain ? 2 : 0;
+    if(mode === "all") return onMain ? 2 : 1;
     // "beats" (and pattern default): every numerator beat, downbeat click where BPM is measured
     return i % g.num === 0 ? (onPulse ? 2 : 1) : 0;
   });

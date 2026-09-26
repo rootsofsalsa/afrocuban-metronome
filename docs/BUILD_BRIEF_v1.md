@@ -71,7 +71,7 @@ Work through the phases in order. At the end of each phase, stop, summarize what
    | 16-step `2bar` | `D.x.D.x.D.x.D.x.` | `D...D...D...D...` |
    | 16-step `1bar` | `D...x...D...x...` | `D.......D.......` |
    | 12-step `dq` | `DxxDxxDxxDxx` | `D..D..D..D..` |
-   | 12-step `e` | `DDDDDDDDDDDD` | `DDDDDDDDDDDD` |
+   | 12-step `e` | `DDDDDDDDDDDD` | `D..D..D..D..` (owner's correction; was `DDDDDDDDDDDD`) |
    | Free: 4/4 cut time, 2 per beat | `DxDx` | `D.D.` |
    | Free: 6/8 in 2, 3 per beat | `DxxDxx` | `D..D..` |
 

@@ -57,8 +57,9 @@ Steps are 0-based. `x` = stroke, `.` = rest, `|` = barline.
 - **Metronome row:** each step is 0 off, 1 click, or 2 downbeat click. There are exactly two click sounds, chosen separately. All regular clicks sound identical. The row has an on/off toggle.
 - **Quick fills:**
   - **Beats** puts clicks on every numerator beat of the time signature, with the downbeat click where BPM is measured. This is also the default.
-  - **Downbeats** puts downbeat clicks only where BPM is measured.
-  - **Every step** puts downbeat clicks on BPM positions and regular clicks everywhere else.
+  - **Downbeats** puts downbeat clicks only on the two main pulses of each bar: the half notes in 4/4, the dotted quarters in 6/8. In the "counted in 2" settings these are the BPM beats. In 4/4 (in 4) they fall on every 2nd BPM beat; in 6/8 (in 6) and the 12-step `e` span, on every 3rd.
+  - **Every step** puts downbeat clicks where Downbeats does and regular clicks everywhere else.
+  - Downbeats and Every step were changed from the v1.0 prototype at the owner's request (Phase 2). Don't revert them to "where BPM is measured".
   - **Clear** turns every step off.
 - **Pattern row:** step toggles (edits are allowed and marked "(edited)"), plus an on/off toggle. Both rows share one playhead.
 - **Listen, then play:** silent sections counted in *pattern cycles* (bars in free mode). Silence targets "pattern only" (the default), "metronome only" or "everything". The status badge shows "Listen · n of N" and "Your turn · n of N", and the pattern row dims during the student's turn.
