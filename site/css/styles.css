@@ -131,7 +131,7 @@ input[type=number]{width:76px;font-variant-numeric:tabular-nums}
 #presetName{flex:1;min-width:0}
 #savePreset{padding:8px 14px}
 .empty{font-size:14px;color:var(--muted)}
-/* Copyright line. The full legal form (Vincent Alexander Emanuele II d/b/a Roots of Salsa) is in the README. */
+/* Copyright line, in the owner's full formal wording (same as the README). */
 .foot{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
 /* Touch screens: every control is at least 40px tall, and each grid cell's tap area takes in the gap
    around it (34px cell + 6px gap = 40px). The metronome row's 28px cells reach 6px up and down,

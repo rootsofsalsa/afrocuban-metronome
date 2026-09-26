@@ -84,4 +84,4 @@ Not deployed yet. The plan is GitHub Pages at metronome.rootsofsalsa.com, deploy
 
 © 2026 Vincent Alexander Emanuele II d/b/a Roots of Salsa. All rights reserved.
 
-The site shows the short form, "© 2026 Roots of Salsa. All rights reserved.", in its footer.
+The site shows this same notice in its footer.
