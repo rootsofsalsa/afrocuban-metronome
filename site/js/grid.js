@@ -34,6 +34,16 @@ export function defaultMet(mode, g){
   });
 }
 
+// How many grid cells go on one row, when at most maxCells fit across the screen.
+// The whole cycle if it fits; otherwise break at the barline (half the cycle); otherwise into
+// whole groups (the visual beat groups of the grid) inside each half. A group is never split.
+export function rowLength(steps, group, maxCells){
+  if(steps <= maxCells) return steps;
+  const half = steps / 2;
+  for(let n = half; n > group; n--) if(half % n === 0 && n % group === 0 && n <= maxCells) return n;
+  return group;
+}
+
 // Pattern mode and free mode keep separate metronome rows.
 export const metKey = s => gridInfo(s).pattern ? "met" : "freeMet";
 

@@ -131,7 +131,22 @@ input[type=number]{width:76px;font-variant-numeric:tabular-nums}
 #presetName{flex:1;min-width:0}
 #savePreset{padding:8px 14px}
 .empty{font-size:14px;color:var(--muted)}
-/* 144px draws the mark at 129px: the brand book's "acceptable" screen size */
+/* Touch screens: every control is at least 40px tall, and each grid cell's tap area takes in the gap
+   around it (34px cell + 6px gap = 40px). The metronome row's 28px cells reach 6px up and down,
+   so its wrapped rows sit 12px apart to keep those tap areas from overlapping.
+   The insets count from inside the cell's 1px border, hence one extra pixel. */
+@media (pointer: coarse){
+  .cell::after{content:"";position:absolute;inset:-4px}
+  #metCells .cell::after{inset:-7px -4px}
+  #metCells{row-gap:12px}
+  .mute,.mini,.chip,.sw,.btn,select,input[type=text],input[type=number],.preset button{min-height:40px}
+  .mini{padding-inline:8px}
+  .preset button{min-width:40px}
+  input[type=range]{height:40px}
+}
+/* 144px draws the mark at 129px: the brand book's "acceptable" screen size.
+   Narrower side padding in the panels gives the grid room for two rows of eight 40px cells, down to 375px screens. */
 @media (max-width:480px){.logo{width:144px;height:144px}.brand{gap:16px}h1{font-size:clamp(20px,6.2vw,24px)}
+  .transport,.panel{padding-inline:12px}
   .ctrls{grid-template-columns:1fr 1fr}.ctrls .primary{grid-column:1/-1;order:-1}.slider{grid-template-columns:70px 1fr 42px}.lbl{min-width:0;width:100%}
   .sw:has(.hint){flex-wrap:wrap;row-gap:0}.sw .hint{flex-basis:100%;padding-left:24px}}

@@ -4,7 +4,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { METERS, SUBS } from "../site/js/meters.js";
-import { gridInfo, defaultMet, curMet, gapBarsPerUnit } from "../site/js/grid.js";
+import { gridInfo, defaultMet, curMet, gapBarsPerUnit, rowLength } from "../site/js/grid.js";
 
 const row = r => r.map(v => ".xD"[v]).join("");
 
@@ -75,4 +75,22 @@ test("free mode offers only the four meters", () => {
 
 test("subdivisions are None, 2, 3, 4 or 6 per beat", () => {
   assert.deepEqual(SUBS.map(x => [x.n, x.label]), [[1, "None"], [2, "2 per beat"], [3, "3 per beat"], [4, "4 per beat"], [6, "6 per beat"]]);
+});
+
+// Phase 3: on a narrow screen the grid wraps onto more rows. The group is the grid's visual beat group:
+// 4 steps for 16-step patterns, 3 for 12-step patterns, one BPM beat (the subdivision) in free mode.
+describe("grid rows on narrow screens", () => {
+  test("the whole cycle stays on one row when it fits", () => {
+    assert.equal(rowLength(16, 4, 16), 16);
+    assert.equal(rowLength(12, 3, 14), 12);
+  });
+  test("a phone (8 cells across) breaks 16 steps at the barline into 2 rows of 8", () => assert.equal(rowLength(16, 4, 8), 8));
+  test("12-step patterns break at the barline into 2 rows of 6", () => assert.equal(rowLength(12, 3, 8), 6));
+  test("if half a cycle is still too wide, rows hold whole groups", () => assert.equal(rowLength(16, 4, 7), 4));
+  test("free mode: 4/4 in 4 with 6 per beat (24 steps) gives rows of one beat", () => assert.equal(rowLength(24, 6, 8), 6));
+  test("free mode: 6/8 in 6 with 3 per beat (18 steps) never crosses the half bar", () => assert.equal(rowLength(18, 3, 8), 3));
+  test("every row length divides the cycle evenly", () => {
+    for(const [steps, group] of [[16, 4], [12, 3], [8, 2], [12, 6], [18, 3], [24, 6], [36, 6]])
+      for(let max = 1; max <= 40; max++) assert.equal(steps % rowLength(steps, group, max), 0, `${steps} steps, ${max} across`);
+  });
 });

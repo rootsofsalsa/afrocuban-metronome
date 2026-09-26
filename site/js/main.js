@@ -1,7 +1,7 @@
 // UI wiring: settings, controls, playhead drawing, saved setups and keyboard shortcuts.
 import { PATTERNS, SPANS } from "./patterns.js";
 import { METERS, SUBS, SPAN_TO_METER } from "./meters.js";
-import { gridInfo, defaultMet, curSpan, curHits, curMet, metKey, gapBarsPerUnit } from "./grid.js";
+import { gridInfo, defaultMet, curSpan, curHits, curMet, metKey, gapBarsPerUnit, rowLength } from "./grid.js";
 import { store, KEYS } from "./storage.js";
 import { SOUNDS, ctx, unlockAudio, pauseKeepAlive, resumeAudio, setMasterVolume, voice } from "./audio.js";
 import * as scheduler from "./scheduler.js";
@@ -158,29 +158,34 @@ function renderPattern(){
   $("freeMeter").hidden = g.pattern;
   $("patLane").hidden = !g.pattern;
   $("patHint").hidden = !g.pattern;
-  let sep;
+  let sep, group;
   if(g.pattern){
     const sp = curSpan(S);
     $("sigOut").textContent = sp.sig; $("sigNote").textContent = sp.note; $("sigSub").textContent = sp.sub2;
     $("patLaneName").textContent = p.name + (S.hits ? " (edited)" : "");
     $("patInfo").textContent = `${g.steps} steps · ${sp.label.split(" (")[0]}`;
-    const group = g.steps === 16 ? 4 : 3;
+    group = g.steps === 16 ? 4 : 3;
     sep = (c, i) => { if(i > 0 && i % (g.steps/2) === 0) c.classList.add("half"); else if(i > 0 && i % group === 0) c.classList.add("gs"); };
   } else {
     const subName = S.sub > 1 ? " · " + SUBS.find(x => x.n === S.sub).label.toLowerCase() : "";
     $("patInfo").textContent = `1 bar · ${S.beats} beat${S.beats === 1 ? "" : "s"}${subName}`;
+    group = g.spb;
     sep = (c, i) => { if(g.spb > 1 && i > 0 && i % g.spb === 0) c.classList.add("half"); else if(g.spb === 1 && i > 0) c.classList.add("gs"); };
   }
+  // On narrow screens the grid wraps onto more rows (see rowLength). A row's first cell needs no divider.
+  const perRow = rowLength(g.steps, group, cellsAcross());
+  const divide = (c, i) => { if(i % perRow) sep(c, i); };
+  const cols = `repeat(${perRow}, minmax(0,1fr))`;
   // Metronome row
   $("metLane").classList.toggle("off", !S.metOn);
   $("metToggle").classList.toggle("on", S.metOn); $("metToggle").setAttribute("aria-pressed", S.metOn);
   $("patLane").classList.toggle("off", !S.patOn);
   $("patToggle").classList.toggle("on", S.patOn); $("patToggle").setAttribute("aria-pressed", S.patOn);
   const mbox = $("metCells"); mbox.innerHTML = "";
-  mbox.style.gridTemplateColumns = `repeat(${g.steps}, minmax(0,1fr))`;
+  mbox.style.gridTemplateColumns = cols;
   for(let i=0;i<g.steps;i++){
     const c = document.createElement("button");
-    c.className = "cell" + (met[i] ? " m" + met[i] : ""); sep(c, i);
+    c.className = "cell" + (met[i] ? " m" + met[i] : ""); divide(c, i);
     c.setAttribute("aria-label", `Metronome step ${i+1}, ${["off","click","downbeat click"][met[i]]}`);
     c.onclick = () => { const m = curMet(S).slice(); m[i] = (m[i] + 1) % 3; S[metKey(S)] = m; renderPattern(); save(); };
     mbox.appendChild(c);
@@ -189,10 +194,10 @@ function renderPattern(){
   const box = $("cells"); box.innerHTML = "";
   if(!g.pattern) return;
   const hits = curHits(S);
-  box.style.gridTemplateColumns = `repeat(${g.steps}, minmax(0,1fr))`;
+  box.style.gridTemplateColumns = cols;
   for(let i=0;i<g.steps;i++){
     const c = document.createElement("button");
-    c.className = "cell" + (hits.includes(i) ? " hit" : ""); sep(c, i);
+    c.className = "cell" + (hits.includes(i) ? " hit" : ""); divide(c, i);
     c.setAttribute("aria-label", `Step ${i+1}${hits.includes(i) ? ", stroke" : ""}`);
     c.onclick = () => {
       const h = curHits(S).slice(); const at = h.indexOf(i);
@@ -203,6 +208,16 @@ function renderPattern(){
     box.appendChild(c);
   }
 }
+// How many grid cells fit across. On a touch screen each cell's tap area (the cell plus the 6px gap)
+// must be at least 40px wide; with a mouse, 24px is enough.
+const coarse = matchMedia("(pointer: coarse)");
+function cellsAcross(){
+  return Math.max(1, Math.floor(($("metCells").clientWidth + 6) / (coarse.matches ? 40 : 24)));
+}
+// Re-wrap the grid when the width changes (rotating the phone, resizing the window).
+let across = 0;
+new ResizeObserver(() => { const n = cellsAcross(); if(n !== across){ across = n; renderPattern(); } }).observe($("metCells"));
+
 patSel.onchange = () => { const prev = curSpan(S); S.pattern = patSel.value;
   if(!curSpan(S)) applyMeter(METERS.find(m => m.id === (prev ? SPAN_TO_METER[prev.id] : "44in2")), true);
   S.hits = null; S.met = null; renderSpanOptions(); applySpanMeter(); renderPattern(); save(); };
