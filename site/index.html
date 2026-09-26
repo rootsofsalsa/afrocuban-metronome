@@ -90,22 +90,8 @@
         </div>
       </section>
 
-      <section class="panel" aria-labelledby="h-sound">
-        <h2 id="h-sound">Sound &amp; mix</h2>
-        <div class="row" id="sounds"><span class="lbl">Click</span></div>
-        <div class="row" id="downSounds"><span class="lbl">Downbeat click</span></div>
-        <div class="row" id="patSounds"><span class="lbl">Pattern</span></div>
-        <div class="slider"><span>Master</span><input type="range" id="vMaster" min="0" max="100" value="80"><output id="vMasterOut">80</output></div>
-        <div class="slider"><span>Clicks</span><input type="range" id="vBeat" min="0" max="100" value="85"><output id="vBeatOut">85</output></div>
-        <div class="slider"><span>Pattern</span><input type="range" id="vPat" min="0" max="100" value="80"><output id="vPatOut">80</output></div>
-      </section>
-
       <section class="panel" aria-labelledby="h-practice">
         <h2 id="h-practice">Practice tools</h2>
-        <div class="sub">
-          <label class="sw"><input type="checkbox" id="trOn"> <b>Speed trainer</b></label>
-          <div class="row">Change by <input type="number" id="trStep" value="2" min="-20" max="20"> BPM every <input type="number" id="trEvery" value="4" min="1" max="64"> bars until <input type="number" id="trTarget" value="140" min="20" max="300"></div>
-        </div>
         <div class="sub">
           <label class="sw"><input type="checkbox" id="gapOn"> <b>Listen, then play</b> <span class="hint">silent sections for ear training</span></label>
           <div class="row">Silence <select id="gapWhat" aria-label="What goes silent">
@@ -116,7 +102,21 @@
           <div class="row sentence">Play <input type="number" id="gapPlay" value="2" min="1" max="32"> <span class="gapUnit">cycles</span>, then silence <input type="number" id="gapMute" value="2" min="1" max="32"> <span class="gapUnit">cycles</span></div>
           <p class="hint" id="gapHint"></p>
         </div>
+        <div class="sub">
+          <label class="sw"><input type="checkbox" id="trOn"> <b>Speed trainer</b></label>
+          <div class="row">Change by <input type="number" id="trStep" value="2" min="-20" max="20"> BPM every <input type="number" id="trEvery" value="4" min="1" max="64"> bars until <input type="number" id="trTarget" value="140" min="20" max="300"></div>
+        </div>
         <label class="sw"><input type="checkbox" id="countIn"> Count in one bar before patterns and trainers start</label>
+      </section>
+
+      <section class="panel" aria-labelledby="h-sound">
+        <h2 id="h-sound">Sound &amp; mix</h2>
+        <div class="row" id="sounds"><span class="lbl">Click</span></div>
+        <div class="row" id="downSounds"><span class="lbl">Downbeat click</span></div>
+        <div class="row" id="patSounds"><span class="lbl">Pattern</span></div>
+        <div class="slider"><span>Master</span><input type="range" id="vMaster" min="0" max="100" value="80"><output id="vMasterOut">80</output></div>
+        <div class="slider"><span>Clicks</span><input type="range" id="vBeat" min="0" max="100" value="85"><output id="vBeatOut">85</output></div>
+        <div class="slider"><span>Pattern</span><input type="range" id="vPat" min="0" max="100" value="80"><output id="vPatOut">80</output></div>
       </section>
 
       <section class="panel" aria-labelledby="h-presets">
