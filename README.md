@@ -30,7 +30,12 @@ The page won't work if you double-click `site/index.html`, because browsers don'
 node --test tests/
 ```
 
-Needs Node 22 or newer. The tests guard the pattern data and the metronome-row quick fills. They're written in Phase 2 of the build brief.
+Needs Node 22 or newer (on the Mac: `brew install node`). No npm packages are needed.
+
+- `tests/patterns.test.js` checks every pattern's name, step count and strokes against the pattern table in `CLAUDE.md`, and the "One cycle" counting rules.
+- `tests/grid.test.js` checks the metronome-row quick fills (Beats, Downbeats, Every step, Clear) for every "One cycle" option and free-mode meter, plus "Listen, then play" cycle counting.
+
+If a test fails, the app has drifted from the owner's musical rules. Fix the app, not the test, unless the owner has changed the rule.
 
 ## Project layout
 
@@ -54,7 +59,7 @@ Needs Node 22 or newer. The tests guard the pattern data and the metronome-row q
 
 Edit `site/js/patterns.js` only. Add an entry with an id, the display name, the step count (12 or 16) and the 0-based step positions of the strokes. The "One cycle" options come from the step count, so a new pattern must have 12 or 16 steps.
 
-Also add the pattern to the table in `CLAUDE.md`, and to the pattern tests once they exist. Follow the naming conventions in `CLAUDE.md`.
+Also add the pattern to the table in `CLAUDE.md` and to the `CANON` list in `tests/patterns.test.js`, then run `node --test tests/`. Follow the naming conventions in `CLAUDE.md`.
 
 ## Add recorded samples
 
