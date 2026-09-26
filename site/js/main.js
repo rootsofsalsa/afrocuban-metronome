@@ -23,12 +23,13 @@ if(!PATTERNS[S.pattern]){ S.pattern = "none"; S.hits = null; }
 const save = () => store.set(KEYS.state, S);
 
 /* ---------- Transport ---------- */
-let wake = null;
+// away: the page has been in the background since sound last started, so another app may have taken the audio.
+let wake = null, away = false;
 async function start(){
   if(scheduler.isRunning()) return;
   // Unlock audio right here in the tap, with no await first (iPhone rule). The clock can start while the
   // audio finishes waking up: audio time stands still until it runs, so no beat is lost or bunched.
-  unlockAudio(S.vol.master);
+  unlockAudio(S.vol.master, away); away = false;
   scheduler.start(S, setBpm);
   $("play").textContent = "Stop"; $("play").classList.add("on");
   requestAnimationFrame(draw);
@@ -58,7 +59,7 @@ $("play").onclick = toggle;
 // Coming back to the page: iPhone suspends audio for calls, Siri and app switches, so wake it up again.
 // The browser also drops the screen wake lock whenever the page is hidden, so ask for it again.
 document.addEventListener("visibilitychange", () => {
-  if(document.visibilityState !== "visible") return;
+  if(document.visibilityState === "hidden"){ away = true; return; }
   resumeAudio();
   if(scheduler.isRunning()) keepAwake();
 });
@@ -127,7 +128,7 @@ const refreshSubs = chips("subs", SUBS, it => it.n === S.sub, it => { S.sub = it
 const refreshSounds = chips("sounds", SOUNDS, it => it.id === S.sound, it => { S.sound = it.id; refreshSounds(); save(); preview(it.id); });
 const refreshDownSounds = chips("downSounds", SOUNDS, it => it.id === S.downSound, it => { S.downSound = it.id; refreshDownSounds(); save(); preview(it.id); });
 const refreshPatSounds = chips("patSounds", SOUNDS, it => it.id === S.patSound, it => { S.patSound = it.id; refreshPatSounds(); save(); preview(it.id); });
-function preview(kind){ if(scheduler.isRunning()) return; unlockAudio(S.vol.master); voice(kind, ctx.currentTime + 0.02, (S.vol.beat/100)**2, "accent"); }
+function preview(kind){ if(scheduler.isRunning()) return; unlockAudio(S.vol.master, away); away = false; voice(kind, ctx.currentTime + 0.02, (S.vol.beat/100)**2, "accent"); }
 
 /* Pattern UI */
 const patSel = $("pattern");

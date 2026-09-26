@@ -26,8 +26,12 @@ let keepAlive = null;
 
 // Call straight from a tap (Start, a sound preview). Browsers only let audio start inside a user
 // gesture, and on iPhone everything here must happen before the tap handler's first await.
-export function unlockAudio(masterVol){
+// fresh: replace the AudioContext. After another app (Spotify, a phone call) has used the sound while
+// the page was in the background, iPhone can leave the old one stuck and silent, and resume() doesn't
+// bring it back. A new one works. A context that isn't running is replaced too.
+export function unlockAudio(masterVol, fresh){
   if(navigator.audioSession) navigator.audioSession.type = "playback";
+  if(ctx && (fresh || ctx.state !== "running")){ ctx.close().catch(() => {}); ctx = null; }
   initAudio(masterVol);
   if(ctx.state !== "running") ctx.resume().catch(() => {});
   if(needsKeepAlive){
