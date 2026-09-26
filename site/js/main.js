@@ -3,7 +3,7 @@ import { PATTERNS, SPANS } from "./patterns.js";
 import { METERS, SUBS, SPAN_TO_METER } from "./meters.js";
 import { gridInfo, defaultMet, curSpan, curHits, curMet, metKey, gapBarsPerUnit } from "./grid.js";
 import { store, KEYS } from "./storage.js";
-import { SOUNDS, ctx, initAudio, setMasterVolume, voice } from "./audio.js";
+import { SOUNDS, ctx, unlockAudio, pauseKeepAlive, resumeAudio, setMasterVolume, voice } from "./audio.js";
 import * as scheduler from "./scheduler.js";
 
 const $ = id => document.getElementById(id);
@@ -23,21 +23,20 @@ if(!PATTERNS[S.pattern]){ S.pattern = "none"; S.hits = null; }
 const save = () => store.set(KEYS.state, S);
 
 /* ---------- Transport ---------- */
-let starting = false, wake = null;
+let wake = null;
 async function start(){
-  if(starting || scheduler.isRunning()) return;   // a second tap while audio wakes up must not start a second clock
-  starting = true;
-  try{
-    initAudio(S.vol.master);
-    if(ctx.state === "suspended") await ctx.resume();
-    scheduler.start(S, setBpm);
-  } finally { starting = false; }
+  if(scheduler.isRunning()) return;
+  // Unlock audio right here in the tap, with no await first (iPhone rule). The clock can start while the
+  // audio finishes waking up: audio time stands still until it runs, so no beat is lost or bunched.
+  unlockAudio(S.vol.master);
+  scheduler.start(S, setBpm);
   $("play").textContent = "Stop"; $("play").classList.add("on");
-  try{ wake = await navigator.wakeLock?.request("screen"); }catch(e){ wake = null; }
   requestAnimationFrame(draw);
+  try{ wake = await navigator.wakeLock?.request("screen"); }catch(e){ wake = null; }
 }
 function stop(){
   scheduler.stop();
+  pauseKeepAlive();
   $("play").textContent = "Start"; $("play").classList.remove("on");
   document.querySelectorAll(".cell.now").forEach(e => e.classList.remove("now"));
   $("stateOut").innerHTML = '<span class="pill">Stopped</span>';
@@ -46,6 +45,10 @@ function stop(){
 }
 const toggle = () => scheduler.isRunning() ? stop() : start();
 $("play").onclick = toggle;
+// Coming back to the page: iPhone suspends audio for calls, Siri and app switches, so wake it up again.
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState === "visible") resumeAudio();
+});
 
 /* ---------- Visuals ---------- */
 function draw(){
@@ -111,7 +114,7 @@ const refreshSubs = chips("subs", SUBS, it => it.n === S.sub, it => { S.sub = it
 const refreshSounds = chips("sounds", SOUNDS, it => it.id === S.sound, it => { S.sound = it.id; refreshSounds(); save(); preview(it.id); });
 const refreshDownSounds = chips("downSounds", SOUNDS, it => it.id === S.downSound, it => { S.downSound = it.id; refreshDownSounds(); save(); preview(it.id); });
 const refreshPatSounds = chips("patSounds", SOUNDS, it => it.id === S.patSound, it => { S.patSound = it.id; refreshPatSounds(); save(); preview(it.id); });
-function preview(kind){ if(scheduler.isRunning()) return; initAudio(S.vol.master); ctx.resume(); voice(kind, ctx.currentTime + 0.02, (S.vol.beat/100)**2, "accent"); }
+function preview(kind){ if(scheduler.isRunning()) return; unlockAudio(S.vol.master); voice(kind, ctx.currentTime + 0.02, (S.vol.beat/100)**2, "accent"); }
 
 /* Pattern UI */
 const patSel = $("pattern");

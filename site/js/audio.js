@@ -1,4 +1,4 @@
-// AudioContext and synthesized voices. Sample loading and choke come in Phase 4.
+// AudioContext, unlocking audio on phones, and synthesized voices. Sample loading and choke come in Phase 4.
 
 export const SOUNDS = [{id:"click",label:"Click"},{id:"wood",label:"Woodblock"},{id:"clave",label:"Clave"},{id:"cowbell",label:"Cowbell"},{id:"stick",label:"Rim"},{id:"beep",label:"Beep"}];
 
@@ -16,6 +16,47 @@ export function initAudio(masterVol){
   master.connect(comp).connect(ctx.destination);
   noise = ctx.createBuffer(1, ctx.sampleRate*0.5, ctx.sampleRate);
   const d = noise.getChannelData(0); for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+}
+
+// iPhone silent switch: Safari 16.4+ lets the page say it plays media (Audio Session API), which the
+// ringer switch doesn't mute. Older iPhones get a silent looping <audio> element instead, which moves
+// the page into the same media-playback category.
+const needsKeepAlive = !navigator.audioSession && navigator.maxTouchPoints > 0 && "webkitAudioContext" in window;
+let keepAlive = null;
+
+// Call straight from a tap (Start, a sound preview). Browsers only let audio start inside a user
+// gesture, and on iPhone everything here must happen before the tap handler's first await.
+export function unlockAudio(masterVol){
+  if(navigator.audioSession) navigator.audioSession.type = "playback";
+  initAudio(masterVol);
+  if(ctx.state !== "running") ctx.resume().catch(() => {});
+  if(needsKeepAlive){
+    if(!keepAlive){
+      keepAlive = new Audio(silentWav(ctx.sampleRate));
+      keepAlive.loop = true;
+      keepAlive.setAttribute("x-webkit-airplay", "deny");
+    }
+    keepAlive.play().catch(() => {});
+  }
+}
+
+export function pauseKeepAlive(){ keepAlive?.pause(); }
+
+// Back on the page after a call, Siri or another app: iPhone leaves the audio suspended ("interrupted").
+export function resumeAudio(){
+  if(ctx && ctx.state !== "running") ctx.resume().catch(() => {});
+}
+
+// 0.1 s of silence as a WAV file (8-bit mono, at the AudioContext's sample rate), for the keep-alive element.
+function silentWav(rate){
+  const n = Math.round(rate / 10), d = new DataView(new ArrayBuffer(44 + n));
+  const text = (at, s) => [...s].forEach((ch, i) => d.setUint8(at + i, ch.charCodeAt(0)));
+  text(0, "RIFF"); d.setUint32(4, 36 + n, true); text(8, "WAVE");
+  text(12, "fmt "); d.setUint32(16, 16, true); d.setUint16(20, 1, true); d.setUint16(22, 1, true);
+  d.setUint32(24, rate, true); d.setUint32(28, rate, true); d.setUint16(32, 1, true); d.setUint16(34, 8, true);
+  text(36, "data"); d.setUint32(40, n, true);
+  for(let i = 0; i < n; i++) d.setUint8(44 + i, 128);   // 128 is silence in 8-bit WAV
+  return URL.createObjectURL(new Blob([d], {type:"audio/wav"}));
 }
 
 export function setMasterVolume(vol){
