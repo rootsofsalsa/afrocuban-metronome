@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><!-- Temporary favicon, drawn in Phase 1. Replaced with a brand icon in Phase 1b. --></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Temporary favicon in the prototype's colors: three grid cells (downbeat, off, click).
+       Replaced with a brand icon in Phase 1b. -->
+  <rect width="32" height="32" rx="7" fill="#2C47D0"/>
+  <rect x="6" y="10" width="5" height="12" rx="1.5" fill="#FFFFFF"/>
+  <rect x="13.5" y="10" width="5" height="12" rx="1.5" fill="#FFFFFF" fill-opacity=".4"/>
+  <rect x="21" y="10" width="5" height="12" rx="1.5" fill="#FFFFFF" fill-opacity=".75"/>
+</svg>
