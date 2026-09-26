@@ -4,7 +4,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { METERS, SUBS } from "../site/js/meters.js";
-import { gridInfo, defaultMet, curMet, gapBarsPerUnit, rowLength } from "../site/js/grid.js";
+import { gridInfo, defaultMet, curMet, gapBarsPerUnit, rowLength, strokeAt } from "../site/js/grid.js";
 
 const row = r => r.map(v => ".xD"[v]).join("");
 
@@ -92,5 +92,22 @@ describe("grid rows on narrow screens", () => {
   test("every row length divides the cycle evenly", () => {
     for(const [steps, group] of [[16, 4], [12, 3], [8, 2], [12, 6], [18, 3], [24, 6], [36, 6]])
       for(let max = 1; max <= 40; max++) assert.equal(steps % rowLength(steps, group, max), 0, `${steps} steps, ${max} across`);
+  });
+});
+
+// Phase 4: which hand plays each stroke (R, L, F = flam), from the owner's catá sticking.
+describe("catá hands", () => {
+  const hands = (pattern, steps) => steps.map(i => strokeAt({pattern}, i)).join(" ");
+  test("Catá Habanero plays R L R L L R L R L L on its strokes", () =>
+    assert.equal(hands("habanero", [0,2,3,5,7,8,10,12,13,15]), "R L R L L R L R L L"));
+  test("Catá Matancero plays R L L R L L R L R L L on its strokes", () =>
+    assert.equal(hands("matancero", [0,1,3,4,5,7,8,10,12,13,15]), "R L L R L L R L R L L"));
+  test("Catá de Columbia plays F R L R L R F on its strokes", () =>
+    assert.equal(hands("columbia", [0,2,3,5,6,7,9]), "F R L R L R F"));
+  test("a stroke added on a new step plays the right hand", () => assert.equal(strokeAt({pattern:"habanero"}, 1), "R"));
+  test("a removed stroke added back keeps its hand (sticking is by step)", () => assert.equal(strokeAt({pattern:"habanero", hits:[0,2]}, 2), "L"));
+  test("patterns without a sticking play the right hand", () => {
+    assert.equal(strokeAt({pattern:"tresdos"}, 0), "R");
+    assert.equal(strokeAt({pattern:"abakua"}, 5), "R");
   });
 });

@@ -35,6 +35,17 @@ Steps are 0-based. `x` = stroke, `.` = rest, `|` = barline.
 | matancero | Catá Matancero | 16 | 4/4 | `x x . x x x . x \| x . x . x x . x` | 0,1,3,4,5,7,8,10,12,13,15 |
 | columbia | Catá de Columbia | 12 | 6/8 | `x . x x . x \| x x . x . .` | 0,2,3,5,6,7,9 |
 
+**Catá sticking (owner's, keep exactly):** `R` = right hand, `L` = left hand, `F` = flam. Each letter sits on a stroke of the notation above.
+
+| id | Sticking |
+|---|---|
+| habanero | `R . L R . L . L \| R . L . R L . L` |
+| matancero | `R L . L R L . L \| R . L . R L . L` |
+| columbia | `F . R L . R \| L R . F . .` |
+
+- A stroke removed on the grid and added back keeps its hand. A stroke added on a new step, and every stroke of a pattern without a sticking, plays `R`.
+- **Pattern sound:** choosing a pattern also picks its instrument (Clave, Campana or Catá) as the pattern sound. The user can still change it.
+
 **Naming conventions (owner's lineage, keep exactly):**
 - No article ("La"). Capitalize the main words; "de" and "por" stay lowercase.
 - "Clave Dos Tres" is what many sources call "3-2 rumba clave". Don't rename it.

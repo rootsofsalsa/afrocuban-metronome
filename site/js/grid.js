@@ -44,6 +44,17 @@ export function rowLength(steps, group, maxCells){
   return group;
 }
 
+// Which hand plays a pattern stroke: "R", "L" or "F" (flam) from the pattern's sticking. A stroke removed on
+// the grid and added back keeps its hand; a stroke added on a new step, or a pattern without sticking, plays "R".
+const stickings = new Map();
+export function strokeAt(s, step){
+  const text = PATTERNS[s.pattern].sticking;
+  if(!text) return "R";
+  if(!stickings.has(text)) stickings.set(text, text.split(/\s+/).filter(t => t !== "|"));
+  const letter = stickings.get(text)[step];
+  return letter && letter !== "." ? letter : "R";
+}
+
 // Pattern mode and free mode keep separate metronome rows.
 export const metKey = s => gridInfo(s).pattern ? "met" : "freeMet";
 

@@ -2,18 +2,21 @@
 // To add a pattern, add an entry to PATTERNS. It must have 12 or 16 steps, because the
 // "One cycle" options in SPANS are defined per step count.
 
-/* Patterns: step indices of the strokes, 0-based. "none" is the Off choice (free mode). */
+/* Patterns: step indices of the strokes, 0-based. "none" is the Off choice (free mode).
+   instrument: the pattern sound picked along with the pattern (clave, campana or cata).
+   sticking (catá patterns, owner's): the notation with each stroke written R (right hand), L (left hand)
+   or F (flam); "." is a rest and "|" the barline. Each letter must sit on a stroke in hits. */
 export const PATTERNS = {
   none:       {name:"Off", steps:0, hits:[]},
-  tresdos:    {name:"Clave Tres Dos", steps:16, hits:[0,3,6,10,12]},
-  yambu:      {name:"Clave de Yambú Matancera", steps:16, hits:[0,3,4,7,8,10,12]},
-  dostres:    {name:"Clave Dos Tres", steps:16, hits:[0,3,7,10,12]},
-  abakua:     {name:"Campana de Abakuá", steps:12, hits:[0,2,5,7,9]},
-  seisxocho:  {name:"Campana Seis por Ocho", steps:12, hits:[0,2,4,5,7,9,11]},
-  guiro:      {name:"Campana de Güiro", steps:12, hits:[1,2,4,5,7,9,11]},
-  habanero:   {name:"Catá Habanero", steps:16, hits:[0,2,3,5,7,8,10,12,13,15]},
-  matancero:  {name:"Catá Matancero", steps:16, hits:[0,1,3,4,5,7,8,10,12,13,15]},
-  columbia:   {name:"Catá de Columbia", steps:12, hits:[0,2,3,5,6,7,9]},
+  tresdos:    {name:"Clave Tres Dos", steps:16, hits:[0,3,6,10,12], instrument:"clave"},
+  yambu:      {name:"Clave de Yambú Matancera", steps:16, hits:[0,3,4,7,8,10,12], instrument:"clave"},
+  dostres:    {name:"Clave Dos Tres", steps:16, hits:[0,3,7,10,12], instrument:"clave"},
+  abakua:     {name:"Campana de Abakuá", steps:12, hits:[0,2,5,7,9], instrument:"campana"},
+  seisxocho:  {name:"Campana Seis por Ocho", steps:12, hits:[0,2,4,5,7,9,11], instrument:"campana"},
+  guiro:      {name:"Campana de Güiro", steps:12, hits:[1,2,4,5,7,9,11], instrument:"campana"},
+  habanero:   {name:"Catá Habanero", steps:16, hits:[0,2,3,5,7,8,10,12,13,15], instrument:"cata", sticking:"R . L R . L . L | R . L . R L . L"},
+  matancero:  {name:"Catá Matancero", steps:16, hits:[0,1,3,4,5,7,8,10,12,13,15], instrument:"cata", sticking:"R L . L R L . L | R . L . R L . L"},
+  columbia:   {name:"Catá de Columbia", steps:12, hits:[0,2,3,5,6,7,9], instrument:"cata", sticking:"F . R L . R | L R . F . ."},
 };
 
 /* "One cycle" options per step count.

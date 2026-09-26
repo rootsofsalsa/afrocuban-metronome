@@ -5,16 +5,20 @@ import assert from "node:assert/strict";
 import { PATTERNS, SPANS } from "../site/js/patterns.js";
 
 // The table from CLAUDE.md, in the same order. This is also the order of the pattern menu.
+// instrument is the pattern sound picked with the pattern; sticking is the owner's catá sticking (R, L, F = flam).
 const CANON = [
-  {id:"tresdos",   name:"Clave Tres Dos",           steps:16, meter:"4/4", notation:"x . . x . . x . | . . x . x . . .", hits:[0,3,6,10,12]},
-  {id:"yambu",     name:"Clave de Yambú Matancera", steps:16, meter:"4/4", notation:"x . . x x . . x | x . x . x . . .", hits:[0,3,4,7,8,10,12]},
-  {id:"dostres",   name:"Clave Dos Tres",           steps:16, meter:"4/4", notation:"x . . x . . . x | . . x . x . . .", hits:[0,3,7,10,12]},
-  {id:"abakua",    name:"Campana de Abakuá",        steps:12, meter:"6/8", notation:"x . x . . x | . x . x . .",         hits:[0,2,5,7,9]},
-  {id:"seisxocho", name:"Campana Seis por Ocho",    steps:12, meter:"6/8", notation:"x . x . x x | . x . x . x",         hits:[0,2,4,5,7,9,11]},
-  {id:"guiro",     name:"Campana de Güiro",         steps:12, meter:"6/8", notation:". x x . x x | . x . x . x",         hits:[1,2,4,5,7,9,11]},
-  {id:"habanero",  name:"Catá Habanero",            steps:16, meter:"4/4", notation:"x . x x . x . x | x . x . x x . x", hits:[0,2,3,5,7,8,10,12,13,15]},
-  {id:"matancero", name:"Catá Matancero",           steps:16, meter:"4/4", notation:"x x . x x x . x | x . x . x x . x", hits:[0,1,3,4,5,7,8,10,12,13,15]},
-  {id:"columbia",  name:"Catá de Columbia",         steps:12, meter:"6/8", notation:"x . x x . x | x x . x . .",         hits:[0,2,3,5,6,7,9]},
+  {id:"tresdos",   name:"Clave Tres Dos",           steps:16, meter:"4/4", notation:"x . . x . . x . | . . x . x . . .", hits:[0,3,6,10,12], instrument:"clave"},
+  {id:"yambu",     name:"Clave de Yambú Matancera", steps:16, meter:"4/4", notation:"x . . x x . . x | x . x . x . . .", hits:[0,3,4,7,8,10,12], instrument:"clave"},
+  {id:"dostres",   name:"Clave Dos Tres",           steps:16, meter:"4/4", notation:"x . . x . . . x | . . x . x . . .", hits:[0,3,7,10,12], instrument:"clave"},
+  {id:"abakua",    name:"Campana de Abakuá",        steps:12, meter:"6/8", notation:"x . x . . x | . x . x . .",         hits:[0,2,5,7,9], instrument:"campana"},
+  {id:"seisxocho", name:"Campana Seis por Ocho",    steps:12, meter:"6/8", notation:"x . x . x x | . x . x . x",         hits:[0,2,4,5,7,9,11], instrument:"campana"},
+  {id:"guiro",     name:"Campana de Güiro",         steps:12, meter:"6/8", notation:". x x . x x | . x . x . x",         hits:[1,2,4,5,7,9,11], instrument:"campana"},
+  {id:"habanero",  name:"Catá Habanero",            steps:16, meter:"4/4", notation:"x . x x . x . x | x . x . x x . x", hits:[0,2,3,5,7,8,10,12,13,15], instrument:"cata",
+                                                                            sticking:"R . L R . L . L | R . L . R L . L"},
+  {id:"matancero", name:"Catá Matancero",           steps:16, meter:"4/4", notation:"x x . x x x . x | x . x . x x . x", hits:[0,1,3,4,5,7,8,10,12,13,15], instrument:"cata",
+                                                                            sticking:"R L . L R L . L | R . L . R L . L"},
+  {id:"columbia",  name:"Catá de Columbia",         steps:12, meter:"6/8", notation:"x . x x . x | x x . x . .",         hits:[0,2,3,5,6,7,9], instrument:"cata",
+                                                                            sticking:"F . R L . R | L R . F . ."},
 ];
 
 test("the pattern menu is Off plus exactly the patterns in CLAUDE.md, in order", () => {
@@ -42,6 +46,17 @@ for(const c of CANON){
     assert.deepEqual(cells.flatMap((t, i) => t === "x" ? [i] : []), p.hits, "notation matches the stroke positions");
 
     assert.ok(SPANS[c.steps].every(sp => sp.sig === c.meter), `meter is ${c.meter}`);
+    assert.equal(p.instrument, c.instrument, "instrument");
+    assert.equal(p.sticking, c.sticking, "sticking");
+
+    // The sticking may only name the hand for each stroke: same halves and barline as the notation,
+    // a letter (R, L or F) exactly where the notation has an x, a rest exactly where it has a dot.
+    if(c.sticking){
+      const sticks = c.sticking.split(" | ").map(h => h.split(" "));
+      assert.deepEqual(sticks.map(h => h.length), halves.map(h => h.length), "sticking has the same halves as the notation");
+      sticks.flat().forEach((t, i) => assert.ok(cells[i] === "x" ? "RLF".includes(t) && t.length === 1 : t === ".",
+        `sticking step ${i}: "${t}" where the notation has "${cells[i]}"`));
+    }
   });
 }
 
