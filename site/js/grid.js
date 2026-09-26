@@ -1,1 +1,46 @@
 // Metronome-row defaults and quick fills. Pure functions, no DOM or audio code, so tests can run them in Node.
+// Each function takes the app settings (s) as an argument instead of reading a global.
+import { PATTERNS, SPANS } from "./patterns.js";
+
+export const curHits = s => s.hits || PATTERNS[s.pattern].hits;
+
+export function curSpan(s){
+  const p = PATTERNS[s.pattern];
+  if(!p.steps) return null;
+  return SPANS[p.steps].find(x => x.id === s.span) || SPANS[p.steps][0];
+}
+
+// One step grid drives everything. With a pattern: the pattern's grid. Without: one bar of beats x subdivision.
+export function gridInfo(s){
+  const sp = curSpan(s);
+  // spb = steps per BPM beat (where tempo is measured); num = steps per numerator beat of the time signature
+  if(sp) return {steps:PATTERNS[s.pattern].steps, spb:sp.spb, num:sp.num, beats:sp.beats, pattern:true};
+  const per = s.per || 1, num = s.sub % per === 0 ? s.sub / per : s.sub;
+  return {steps:s.beats*s.sub, spb:s.sub, num, beats:s.beats, pattern:false};
+}
+
+// Metronome row: 0 = off, 1 = click, 2 = downbeat click.
+// mode: "beats" (also the default), "down", "all" or "clear". g comes from gridInfo().
+export function defaultMet(mode, g){
+  return Array.from({length:g.steps}, (_, i) => {
+    if(mode === "clear") return 0;
+    const onPulse = i % g.spb === 0;            // where BPM is measured
+    if(mode === "down") return onPulse ? 2 : 0;
+    if(mode === "all") return onPulse ? 2 : 1;
+    // "beats" (and pattern default): every numerator beat, downbeat click where BPM is measured
+    return i % g.num === 0 ? (onPulse ? 2 : 1) : 0;
+  });
+}
+
+// Pattern mode and free mode keep separate metronome rows.
+export const metKey = s => gridInfo(s).pattern ? "met" : "freeMet";
+
+export function curMet(s){
+  const g = gridInfo(s), m = s[metKey(s)];
+  return (Array.isArray(m) && m.length === g.steps) ? m : defaultMet("auto", g);
+}
+
+// "Listen, then play" counts in pattern cycles: how many bars make one cycle (1 in free mode).
+export function gapBarsPerUnit(g){
+  return g.pattern ? Math.max(1, g.steps / (g.spb * g.beats)) : 1;
+}
