@@ -44,6 +44,7 @@ Needs Node 22 or newer (on the Mac: `brew install node`). No npm packages are ne
 
 - `tests/patterns.test.js` checks every pattern's name, step count and strokes against the pattern table in `CLAUDE.md`, and the "One cycle" counting rules.
 - `tests/grid.test.js` checks the metronome-row quick fills (Beats, Downbeats, Every step, Clear) for every "One cycle" option and free-mode meter, plus "Listen, then play" cycle counting.
+- `tests/links.test.js` checks homework links: the link words, five example links, and that every pattern, "One cycle" option and free-mode meter survives the trip through a link.
 
 If a test fails, the app has drifted from the owner's musical rules. Fix the app, not the test, unless the owner has changed the rule.
 
@@ -59,6 +60,7 @@ If a test fails, the app has drifted from the owner's musical rules. Fix the app
 | `site/js/samples.js` | Which recording files the app looks for, and which one plays for each stroke |
 | `site/js/scheduler.js` | Timing: lookahead scheduler, count-in, listen-then-play, speed trainer |
 | `site/js/storage.js` | Remembers each person's last settings (localStorage) |
+| `site/js/links.js` | Homework links: a whole setup as a readable web address, and back |
 | `site/js/main.js` | Wires the page controls to everything above |
 | `tests/` | Automated checks, run with Node |
 | `.github/workflows/pages.yml` | Runs the tests and publishes `site/` on every push to `main` |
@@ -77,6 +79,36 @@ Also add the pattern to the table in `CLAUDE.md` and to the `CANON` list in `tes
 ## Add recorded samples
 
 Follow the naming convention and recording checklist in `site/samples/README.md`. Put the converted `.m4a` files in `site/samples/` and reload the page: the pattern sounds (Clave, Campana, Catá) switch to the recordings, with no code changes. Remove a file and that sound goes back to its synthesized version. The metronome clicks are always synthesized. Keep raw WAV recordings in `samples-raw/`; git ignores that folder.
+
+## Homework links
+
+A link can carry a whole exercise. A student taps it and the metronome opens set up: pattern, "One cycle", tempo, metronome row, pattern edits, the row on/off switches, sounds, Listen, then play, the speed trainer and count-in. Their own volume levels stay as they are, and nothing plays until they tap Start. A notice at the top shows the link's title, for example "Homework: Week 40".
+
+To make one, open https://metronome.rootsofsalsa.com and set up the exercise. At the bottom, under **Share as a link**, type a title if you like and tap **Copy link**. Paste the link into the YouTube video description, an email or a message. Make links on the live site: a link made on the local preview points at the Mac, which students can't open, and the panel warns about that.
+
+```
+https://metronome.rootsofsalsa.com/?pattern=abakua&bpm=90&listen=2&yourturn=2&title=Week+40
+```
+
+A word only appears when its setting differs from the normal starting value. Anything a link leaves out starts from that value, not from the student's last settings, so every student gets the same exercise.
+
+| Word | Meaning |
+|---|---|
+| `pattern` | The pattern id from the table in `CLAUDE.md` (`tresdos`, `abakua`, `habanero`…), or `off` for no pattern |
+| `cycle` | "One cycle", only when not the first choice: `1bar` (16-step patterns) or `in6` (12-step patterns) |
+| `meter`, `sub` | With no pattern: `44in2`, `44in4`, `68in2` or `68in6`, and the subdivision `1`, `2`, `3`, `4` or `6` per beat |
+| `bpm` | Tempo, 20 to 300 |
+| `clicks` | The metronome row, if not the Beats default: `D` downbeat click, `x` click, `-` off |
+| `strokes` | The pattern row, if edited: `x` stroke, `-` rest |
+| `mute` | `metronome`, `pattern` or `both`: rows switched off |
+| `click`, `downbeat` | Click sounds: `click`, `wood`, `stick` (Rim) or `beep` |
+| `patternsound` | `clave`, `campana` or `cata`, if not the pattern's own instrument |
+| `listen`, `yourturn`, `silence` | Listen, then play: cycles to listen, cycles of your turn (bars with no pattern), and what goes silent if not the pattern (`metronome` or `all`) |
+| `change`, `every`, `until` | Speed trainer: change by this many BPM, every this many bars, until this tempo |
+| `countin` | `on` for the count-in |
+| `title` | The title shown at the top (up to 80 characters) |
+
+**Old links must keep working.** Once a link is in a YouTube description it can't be updated, so the words and what they mean never change. `tests/links.test.js` locks the words and five example links. New optional words can be added. The code is in `site/js/links.js`.
 
 ## Deploy
 
