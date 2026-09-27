@@ -21,7 +21,7 @@ export function gridInfo(s){
 }
 
 // Metronome row: 0 = off, 1 = click, 2 = downbeat click.
-// mode: "beats" (also the default), "down", "all" or "clear". g comes from gridInfo().
+// mode: "beats", "down", "all" or "clear". g comes from gridInfo().
 export function defaultMet(mode, g){
   return Array.from({length:g.steps}, (_, i) => {
     if(mode === "clear") return 0;
@@ -29,7 +29,7 @@ export function defaultMet(mode, g){
     const onMain = i % g.main === 0;            // the two main pulses of each bar
     if(mode === "down") return onMain ? 2 : 0;
     if(mode === "all") return onMain ? 2 : 1;
-    // "beats" (and pattern default): every numerator beat, downbeat click where BPM is measured
+    // "beats": every numerator beat, downbeat click where BPM is measured
     return i % g.num === 0 ? (onPulse ? 2 : 1) : 0;
   });
 }
@@ -58,9 +58,11 @@ export function strokeAt(s, step){
 // Pattern mode and free mode keep separate metronome rows.
 export const metKey = s => gridInfo(s).pattern ? "met" : "freeMet";
 
+// Until the clicks are set, patterns play Downbeats, the way Cubans traditionally train (owner, 2026-09-27),
+// and free mode plays Beats.
 export function curMet(s){
   const g = gridInfo(s), m = s[metKey(s)];
-  return (Array.isArray(m) && m.length === g.steps) ? m : defaultMet("auto", g);
+  return (Array.isArray(m) && m.length === g.steps) ? m : defaultMet(g.pattern ? "down" : "beats", g);
 }
 
 // "Listen, then play" counts in pattern cycles: how many bars make one cycle (1 in free mode).

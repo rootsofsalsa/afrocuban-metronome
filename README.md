@@ -99,7 +99,7 @@ A word only appears when its setting differs from the normal starting value. Any
 | `cycle` | No longer written. It chose the 16th-note grid (`1bar`) or "counted in 6" (`in6`), removed on 2026-09-27; a link with it opens the pattern's own setting |
 | `meter`, `sub` | With no pattern: `44in2`, `44in4`, `68in2` or `68in6`, and the subdivision `1`, `2`, `3`, `4` or `6` per beat |
 | `bpm` | Tempo, 20 to 300 |
-| `clicks` | The metronome row, if not the Beats default: `D` downbeat click, `x` click, `-` off |
+| `clicks` | The metronome row, left out when it's Beats: `D` downbeat click, `x` click, `-` off. Patterns start on Downbeats in the app, so their links usually carry it, e.g. `clicks=D--D--D--D--` |
 | `strokes` | The pattern row, if edited: `x` stroke, `-` rest |
 | `mute` | `metronome`, `pattern` or `both`: rows switched off |
 | `click`, `downbeat` | Click sounds: `click`, `wood`, `stick` (Rim) or `beep` |

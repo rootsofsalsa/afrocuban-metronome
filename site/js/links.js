@@ -44,7 +44,7 @@ export function makeLink(s, title = "", base = LIVE_SITE){
     if(s.sub !== m.sub) q.set("sub", s.sub);
   }
   q.set("bpm", s.bpm);
-  const met = curMet(s);
+  const met = curMet(s);   // left out when it's Beats (see readLink)
   if(met.join() !== defaultMet("beats", g).join()) q.set("clicks", met.map(v => CLICK_CHARS[v]).join(""));
   if(sp && s.hits) q.set("strokes", Array.from({length:g.steps}, (_, i) => s.hits.includes(i) ? "x" : "-").join(""));
   const metOff = !s.metOn, patOff = sp && !s.patOn;
@@ -89,11 +89,11 @@ export function readLink(search){
   s.bpm = int(q.get("bpm"), 20, 300) ?? BASE.bpm;
 
   const g = gridInfo(s);
+  // A link without clicks plays Beats, as every link did before patterns started on Downbeats in the app
+  // (owner, 2026-09-27). So the row is always set here, never left to the app's own starting clicks.
   const clicks = q.get("clicks") || "";
-  if(clicks.length === g.steps && [...clicks].every(c => CLICK_CHARS.includes(c))){
-    const row = [...clicks].map(c => CLICK_CHARS.indexOf(c));
-    if(row.join() !== defaultMet("beats", g).join()) s[metKey(s)] = row;
-  }
+  const valid = clicks.length === g.steps && [...clicks].every(c => CLICK_CHARS.includes(c));
+  s[metKey(s)] = valid ? [...clicks].map(c => CLICK_CHARS.indexOf(c)) : defaultMet("beats", g);
   const strokes = q.get("strokes") || "";
   if(p.steps && strokes.length === g.steps && /^[x-]+$/.test(strokes)){
     const hits = [...strokes].flatMap((c, i) => c === "x" ? [i] : []);

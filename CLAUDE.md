@@ -68,11 +68,12 @@ Steps are 0-based. `x` = stroke, `.` = rest, `|` = barline.
 - Everything runs on one step grid. With a pattern, the grid is the pattern's cycle. In free mode, it's one bar of beats × subdivision.
 - **Metronome row:** each step is 0 off, 1 click, or 2 downbeat click. There are exactly two click sounds, chosen separately. All regular clicks sound identical. The row has an on/off toggle.
 - **Quick fills:**
-  - **Beats** puts clicks on every numerator beat of the time signature, with the downbeat click where BPM is measured. This is also the default.
+  - **Beats** puts clicks on every numerator beat of the time signature, with the downbeat click where BPM is measured. This is the default in free mode.
   - **Downbeats** puts downbeat clicks only on the two main pulses of each bar: the half notes in 4/4, the dotted quarters in 6/8. In the "counted in 2" settings these are the BPM beats. In 4/4 (in 4) they fall on every 2nd BPM beat; in 6/8 (in 6), on every 3rd.
   - **Every step** puts downbeat clicks where Downbeats does and regular clicks everywhere else.
   - Downbeats and Every step were changed from the v1.0 prototype at the owner's request (Phase 2). Don't revert them to "where BPM is measured".
   - **Clear** turns every step off.
+  - **Default (owner, 2026-09-27):** with a pattern, the clicks start on **Downbeats**, "the way Cubans traditionally train". Students can still pick another fill. Free mode starts on Beats. A homework link without `clicks` still plays Beats, as posted links always did.
 - **Pattern row:** step toggles (edits are allowed and marked "(edited)"), plus an on/off toggle. Both rows share one playhead.
 - **Listen, then play:** silent sections counted in *pattern cycles* (bars in free mode). Silence targets "pattern only" (the default), "metronome only" or "everything". The status badge shows "Listen · n of N" and "Your turn · n of N", and the pattern row dims during the student's turn.
 - **Homework links (owner, 2026-09-26):** the "Share as a link" panel makes a readable link (`?pattern=abakua&bpm=90&listen=2&yourturn=2&title=Week+40`) that opens the metronome with the whole setup, practice tools included. The owner posts them in YouTube video descriptions, and published links can't be updated, so **never rename or remove a link word or a pattern id, or change what a word or value means**. New optional words are fine. Anything a link leaves out starts from fixed values in `site/js/links.js`, not from the student's last settings, and volume levels are never in a link. `tests/links.test.js` locks the words and example links. The owner approved one exception (2026-09-27): links no longer write `cycle`, and `cycle=1bar` or `cycle=in6` opens the pattern's own setting, since no posted link used them.

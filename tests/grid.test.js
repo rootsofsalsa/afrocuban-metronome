@@ -36,7 +36,9 @@ for(const c of CASES){
     test("Downbeats", () => assert.equal(fill("down"), c.down));
     test("Every step: downbeat clicks where Downbeats has them, clicks everywhere else", () => assert.equal(fill("all"), c.down.replaceAll(".", "x")));
     test("Clear", () => assert.equal(fill("clear"), ".".repeat(c.beats.length)));
-    test("Beats is the default", () => assert.equal(row(curMet(c.s)), c.beats));
+    // Patterns start on Downbeats, the way Cubans traditionally train (owner, 2026-09-27); free mode on Beats.
+    const start = c.s.pattern === "none" ? "Beats" : "Downbeats";
+    test(`${start} is the default`, () => assert.equal(row(curMet(c.s)), start === "Beats" ? c.beats : c.down));
   });
 }
 
@@ -47,10 +49,10 @@ test("Downbeats lands on the two main pulses of the bar, for every free-mode met
   }
 });
 
-test("a saved metronome row is kept; one that doesn't fit the grid falls back to Beats", () => {
+test("a saved metronome row is kept; one that doesn't fit the grid falls back to the default", () => {
   const saved = [2,0,0,0, 1,0,0,0, 2,0,0,0, 1,0,0,0];
   assert.deepEqual(curMet({...cycle("tresdos", "2bar"), met:saved}), saved);
-  assert.equal(row(curMet({...cycle("abakua", "dq"), met:saved})), "DxxDxxDxxDxx", "12-step pattern ignores a 16-step row");
+  assert.equal(row(curMet({...cycle("abakua", "dq"), met:saved})), "D..D..D..D..", "12-step pattern ignores a 16-step row");
   assert.equal(row(curMet({...free("44in2", 2), met:saved})), "DxDx", "free mode keeps its own row");
 });
 

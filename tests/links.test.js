@@ -88,12 +88,22 @@ test("cycle=1bar and cycle=in6 open the pattern's own setting, and new links lea
   }
 });
 
+test("patterns start on Downbeats in the app, so their links write the clicks; links without clicks still play Beats", () => {
+  const s = read(LIVE_SITE + "?pattern=abakua&bpm=90").settings;
+  assert.equal(row(curMet(s)), "DxxDxxDxxDxx");
+  s.met = null;   // as after choosing the pattern in the app
+  assert.equal(row(curMet(s)), "D..D..D..D..");
+  const link = makeLink(s);
+  assert.equal(link, LIVE_SITE + "?pattern=abakua&bpm=90&clicks=D--D--D--D--");
+  assert.equal(row(curMet(read(link).settings)), "D..D..D..D..");
+});
+
 test("anything a link doesn't mention starts from the same values for everyone", () => {
   const {settings:s} = read(LIVE_SITE + "?pattern=tresdos");
   assert.deepEqual(essentials(s), {pattern:"tresdos", span:"2bar", beats:2, sub:2, unit:"half note", bpm:80,
     clicks:"D.x.D.x.D.x.D.x.", strokes:"0,3,6,10,12", metOn:true, patOn:true, sound:"wood", downSound:"click",
     patSound:"clave", gap:null, tr:null, countIn:false});
-  assert.equal(s.met, null);
+  assert.equal(row(s.met), "D.x.D.x.D.x.D.x.", "Beats, set by the link: the app itself starts patterns on Downbeats");
   assert.equal(s.hits, null);
   assert.deepEqual(s.tr, {on:false, step:2, every:4, target:140});
   assert.deepEqual(s.gap, {on:false, play:2, mute:2, what:"pattern"});
@@ -106,6 +116,7 @@ describe("every setup survives the trip through a link", () => {
     const s = readLink("?pattern=" + id).settings;
     Object.assign(s, {span:sp.id, beats:sp.beats, accents:sp.accents.slice(), sub:sp.sub});
     setups.push([`${p.name}, ${sp.id}`, s]);
+    setups.push([`${p.name}, ${sp.id}, on the app's own starting clicks`, {...structuredClone(s), met:null}]);
   }
   for(const m of METERS) for(const {n} of SUBS) setups.push([`no pattern, ${m.label}, sub ${n}`, readLink(`?pattern=off&meter=${m.id}&sub=${n}`).settings]);
 
@@ -152,8 +163,8 @@ describe("messy links never break the page", () => {
     assert.equal(read(LIVE_SITE + "?pattern=abakua&bpm=999").settings.bpm, 300);
     assert.equal(read(LIVE_SITE + "?pattern=abakua&bpm=5").settings.bpm, 20);
     assert.equal(s("&cycle=2bars").span, "dq", "a 16-step cycle word on a 12-step pattern");
-    assert.equal(s("&clicks=D--D--").met, null, "wrong length");
-    assert.equal(s("&clicks=D..D..D..D..").met, null, "dots aren't link characters");
+    assert.equal(row(s("&clicks=D--D--").met), "DxxDxxDxxDxx", "wrong length: Beats");
+    assert.equal(row(s("&clicks=D..D..D..D..").met), "DxxDxxDxxDxx", "dots aren't link characters: Beats");
     assert.equal(s("&strokes=x-x--x-x-x").hits, null, "wrong length");
     assert.equal(s("&mute=everything").metOn, true);
     assert.deepEqual(s("&listen=0&yourturn=99").gap, {on:true, play:1, mute:32, what:"pattern"});
