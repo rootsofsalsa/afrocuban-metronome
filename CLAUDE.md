@@ -55,11 +55,12 @@ Steps are 0-based. `x` = stroke, `.` = rest, `|` = barline.
 ## Counting and meter rules
 
 - **4/4 patterns count in cut time.** BPM = half notes, two beats per bar. Rumba is fast.
-- **6/8 patterns count in dotted quarters.** BPM = dotted quarter notes, two beats per bar. The alternative "6/8 in 6" option has BPM = eighth notes.
+- **6/8 patterns count in dotted quarters.** BPM = dotted quarter notes, two beats per bar. Free mode's "6/8 (in 6)" has BPM = eighth notes.
 - The BPM display always names its unit ("per half note", "per dotted quarter note"). Don't use Italian tempo words.
-- "One cycle" options for each pattern (`spb` = steps per BPM beat, `num` = steps per numerator beat of the time signature):
-  - 16-step patterns: `2bar` = 2 bars of 4/4 on an 8th-note grid (spb 4, num 2, 2 beats/bar); `1bar` = 1 bar of 4/4 on a 16th grid (spb 8, num 4).
-  - 12-step patterns: `dq` = 2 bars of 6/8, dotted-quarter pulse (spb 3, num 1, 2 beats/bar); `e` = 2 bars of 6/8, eighth-note pulse (spb 1, num 1, 6 beats/bar).
+- "One cycle" for each pattern (`spb` = steps per BPM beat, `num` = steps per numerator beat of the time signature):
+  - 16-step patterns: `2bar` = 2 bars of 4/4 on an 8th-note grid (spb 4, num 2, 2 beats/bar).
+  - 12-step patterns: `dq` = 2 bars of 6/8, dotted-quarter pulse (spb 3, num 1, 2 beats/bar).
+  - The 16th-note grid (`1bar`) and "counted in 6" (`e`) options, and the "One cycle" menu with them, were removed at the owner's request (2026-09-27): "We are not going to use it." Don't bring them back unless the owner asks.
 - **Free mode** (pattern Off) offers only: 4/4 cut time (in 2), 4/4 (in 4), 6/8 (in 2), 6/8 (in 6). Subdivisions are "None" or 2, 3, 4 or 6 per beat. No quintuplets, no other meters, no swing.
 
 ## Grid model
@@ -68,13 +69,13 @@ Steps are 0-based. `x` = stroke, `.` = rest, `|` = barline.
 - **Metronome row:** each step is 0 off, 1 click, or 2 downbeat click. There are exactly two click sounds, chosen separately. All regular clicks sound identical. The row has an on/off toggle.
 - **Quick fills:**
   - **Beats** puts clicks on every numerator beat of the time signature, with the downbeat click where BPM is measured. This is also the default.
-  - **Downbeats** puts downbeat clicks only on the two main pulses of each bar: the half notes in 4/4, the dotted quarters in 6/8. In the "counted in 2" settings these are the BPM beats. In 4/4 (in 4) they fall on every 2nd BPM beat; in 6/8 (in 6) and the 12-step `e` span, on every 3rd.
+  - **Downbeats** puts downbeat clicks only on the two main pulses of each bar: the half notes in 4/4, the dotted quarters in 6/8. In the "counted in 2" settings these are the BPM beats. In 4/4 (in 4) they fall on every 2nd BPM beat; in 6/8 (in 6), on every 3rd.
   - **Every step** puts downbeat clicks where Downbeats does and regular clicks everywhere else.
   - Downbeats and Every step were changed from the v1.0 prototype at the owner's request (Phase 2). Don't revert them to "where BPM is measured".
   - **Clear** turns every step off.
 - **Pattern row:** step toggles (edits are allowed and marked "(edited)"), plus an on/off toggle. Both rows share one playhead.
 - **Listen, then play:** silent sections counted in *pattern cycles* (bars in free mode). Silence targets "pattern only" (the default), "metronome only" or "everything". The status badge shows "Listen · n of N" and "Your turn · n of N", and the pattern row dims during the student's turn.
-- **Homework links (owner, 2026-09-26):** the "Share as a link" panel makes a readable link (`?pattern=abakua&bpm=90&listen=2&yourturn=2&title=Week+40`) that opens the metronome with the whole setup, practice tools included. The owner posts them in YouTube video descriptions, and published links can't be updated, so **never rename or remove a link word or a pattern id, or change what a word or value means**. New optional words are fine. Anything a link leaves out starts from fixed values in `site/js/links.js`, not from the student's last settings, and volume levels are never in a link. `tests/links.test.js` locks the words and example links.
+- **Homework links (owner, 2026-09-26):** the "Share as a link" panel makes a readable link (`?pattern=abakua&bpm=90&listen=2&yourturn=2&title=Week+40`) that opens the metronome with the whole setup, practice tools included. The owner posts them in YouTube video descriptions, and published links can't be updated, so **never rename or remove a link word or a pattern id, or change what a word or value means**. New optional words are fine. Anything a link leaves out starts from fixed values in `site/js/links.js`, not from the student's last settings, and volume levels are never in a link. `tests/links.test.js` locks the words and example links. The owner approved one exception (2026-09-27): links no longer write `cycle`, and `cycle=1bar` or `cycle=in6` opens the pattern's own setting, since no posted link used them.
 - Other features to keep: tap tempo, speed trainer, count-in, keyboard shortcuts (Space, ↑/↓, Shift, T), and remembering each person's last settings in localStorage.
 - Removed on purpose, don't bring back: swing, beat flash, beat pads, Italian tempo markings.
 - Saved setups were removed at the owner's request (2026-09-26), to keep the app focused. Bring them back only if the owner asks, for example because students want them.

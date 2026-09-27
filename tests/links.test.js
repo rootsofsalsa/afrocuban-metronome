@@ -57,26 +57,35 @@ describe("example links read as expected and are written the same way", () => {
     assert.equal(makeLink(s), link);
   });
 
-  test("Catá de Columbia counted in 6, edited, with every other option and an accented title", () => {
-    const link = "https://metronome.rootsofsalsa.com/?pattern=columbia&cycle=in6&bpm=160&strokes=x-xx-xxx-x-x&mute=metronome"
+  test("Catá de Columbia, edited, with every other option and an accented title", () => {
+    const link = "https://metronome.rootsofsalsa.com/?pattern=columbia&bpm=60&strokes=x-xx-xxx-x-x&mute=metronome"
       + "&click=beep&downbeat=stick&patternsound=clave&listen=1&yourturn=3&silence=all&title=Cat%C3%A1+%C2%B7+Week+41";
     const {settings:s, title} = read(link);
     assert.equal(title, "Catá · Week 41");
-    assert.deepEqual(essentials(s), {pattern:"columbia", span:"e", beats:6, sub:1, unit:"eighth note", bpm:160,
-      clicks:"DDDDDDDDDDDD", strokes:"0,2,3,5,6,7,9,11", metOn:false, patOn:true, sound:"beep", downSound:"stick",
+    assert.deepEqual(essentials(s), {pattern:"columbia", span:"dq", beats:2, sub:3, unit:"dotted quarter note", bpm:60,
+      clicks:"DxxDxxDxxDxx", strokes:"0,2,3,5,6,7,9,11", metOn:false, patOn:true, sound:"beep", downSound:"stick",
       patSound:"clave", gap:{on:true, play:1, mute:3, what:"all"}, tr:null, countIn:false});
     assert.equal(makeLink(s, title), link);
   });
 
-  test("Clave Dos Tres on a 16th grid, pattern row off, silencing the metronome, slowing down", () => {
-    const link = "https://metronome.rootsofsalsa.com/?pattern=dostres&cycle=1bar&bpm=100&mute=pattern&listen=4&yourturn=4"
+  test("Clave Dos Tres, pattern row off, silencing the metronome, slowing down", () => {
+    const link = "https://metronome.rootsofsalsa.com/?pattern=dostres&bpm=100&mute=pattern&listen=4&yourturn=4"
       + "&silence=metronome&change=-5&every=8&until=60";
     const {settings:s} = read(link);
-    assert.deepEqual(essentials(s), {pattern:"dostres", span:"1bar", beats:2, sub:4, unit:"half note", bpm:100,
-      clicks:"D...x...D...x...", strokes:"0,3,7,10,12", metOn:true, patOn:false, sound:"wood", downSound:"click",
+    assert.deepEqual(essentials(s), {pattern:"dostres", span:"2bar", beats:2, sub:2, unit:"half note", bpm:100,
+      clicks:"D.x.D.x.D.x.D.x.", strokes:"0,3,7,10,12", metOn:true, patOn:false, sound:"wood", downSound:"click",
       patSound:"clave", gap:{on:true, play:4, mute:4, what:"clicks"}, tr:{on:true, step:-5, every:8, target:60}, countIn:false});
     assert.equal(makeLink(s), link);
   });
+});
+
+// The owner removed the 16th-note grid and "counted in 6" on 2026-09-27, before any posted link used them.
+test("cycle=1bar and cycle=in6 open the pattern's own setting, and new links leave the word out", () => {
+  for(const [link, span] of [["?pattern=dostres&cycle=1bar&bpm=100", "2bar"], ["?pattern=columbia&cycle=in6&bpm=60", "dq"]]){
+    const {settings:s} = read(LIVE_SITE + link);
+    assert.equal(s.span, span);
+    assert.equal(makeLink(s), LIVE_SITE + link.replace(/&cycle=\w+/, ""));
+  }
 });
 
 test("anything a link doesn't mention starts from the same values for everyone", () => {
@@ -142,7 +151,7 @@ describe("messy links never break the page", () => {
     assert.equal(read(LIVE_SITE + "?pattern=abakua&bpm=fast").settings.bpm, 80);
     assert.equal(read(LIVE_SITE + "?pattern=abakua&bpm=999").settings.bpm, 300);
     assert.equal(read(LIVE_SITE + "?pattern=abakua&bpm=5").settings.bpm, 20);
-    assert.equal(s("&cycle=1bar").span, "dq", "a 16-step cycle word on a 12-step pattern");
+    assert.equal(s("&cycle=2bars").span, "dq", "a 16-step cycle word on a 12-step pattern");
     assert.equal(s("&clicks=D--D--").met, null, "wrong length");
     assert.equal(s("&clicks=D..D..D..D..").met, null, "dots aren't link characters");
     assert.equal(s("&strokes=x-x--x-x-x").hits, null, "wrong length");

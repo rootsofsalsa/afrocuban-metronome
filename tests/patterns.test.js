@@ -60,7 +60,8 @@ for(const c of CANON){
   });
 }
 
-// "One cycle" options. spb = steps per BPM beat, num = steps per numerator beat,
+// "One cycle" settings, one per step count (the owner removed the 16th-note grid and "counted in 6", 2026-09-27).
+// spb = steps per BPM beat, num = steps per numerator beat,
 // beats = BPM beats per bar, unit = the note the BPM counts (shown next to the BPM).
 const pick = sp => ({id:sp.id, sig:sp.sig, unit:sp.unit, spb:sp.spb, num:sp.num, beats:sp.beats});
 
@@ -71,13 +72,11 @@ test("patterns come only in 12 and 16 steps", () => {
 test("16-step patterns count in cut time: BPM = half note, 2 beats per bar", () => {
   assert.deepEqual(SPANS[16].map(pick), [
     {id:"2bar", sig:"4/4", unit:"half note", spb:4, num:2, beats:2},
-    {id:"1bar", sig:"4/4", unit:"half note", spb:8, num:4, beats:2},
   ]);
 });
 
-test("12-step patterns count in dotted quarters (2 per bar), or in eighths (6 per bar)", () => {
+test("12-step patterns count in dotted quarters: 2 per bar", () => {
   assert.deepEqual(SPANS[12].map(pick), [
     {id:"dq", sig:"6/8", unit:"dotted quarter note", spb:3, num:1, beats:2},
-    {id:"e",  sig:"6/8", unit:"eighth note",         spb:1, num:1, beats:6},
   ]);
 });

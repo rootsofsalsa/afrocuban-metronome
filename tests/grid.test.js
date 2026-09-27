@@ -1,4 +1,4 @@
-// Phase 2: checks the quick-fill output for each span and each free-mode meter.
+// Phase 2: checks the quick-fill output for each "One cycle" setting and each free-mode meter.
 // Rows are written as in the build brief: D = downbeat click, x = click, . = off.
 // Change these expectations only when the owner changes a counting or quick-fill rule.
 import { describe, test } from "node:test";
@@ -22,9 +22,7 @@ function free(meterId, sub){
 // Downbeats: downbeat clicks on the two main pulses of each bar (half notes in 4/4, dotted quarters in 6/8).
 const CASES = [
   {name:"16-step 2bar",                   s:cycle("tresdos", "2bar"), beats:"D.x.D.x.D.x.D.x.", down:"D...D...D...D..."},
-  {name:"16-step 1bar",                   s:cycle("tresdos", "1bar"), beats:"D...x...D...x...", down:"D.......D......."},
   {name:"12-step dq",                     s:cycle("abakua", "dq"),    beats:"DxxDxxDxxDxx",     down:"D..D..D..D.."},
-  {name:"12-step e",                      s:cycle("abakua", "e"),     beats:"DDDDDDDDDDDD",     down:"D..D..D..D.."},
   {name:"Free: 4/4 cut time, 2 per beat", s:free("44in2", 2),         beats:"DxDx",             down:"D.D."},
   {name:"Free: 4/4 in 4, 2 per beat",     s:free("44in4", 2),         beats:"D.D.D.D.",         down:"D...D..."},
   {name:"Free: 6/8 in 2, 3 per beat",     s:free("68in2", 3),         beats:"DxxDxx",           down:"D..D.."},
@@ -58,9 +56,7 @@ test("a saved metronome row is kept; one that doesn't fit the grid falls back to
 
 test("Listen, then play counts whole pattern cycles (bars in free mode)", () => {
   assert.equal(gapBarsPerUnit(gridInfo(cycle("tresdos", "2bar"))), 2, "2bar: 2 bars per cycle");
-  assert.equal(gapBarsPerUnit(gridInfo(cycle("tresdos", "1bar"))), 1, "1bar: 1 bar per cycle");
   assert.equal(gapBarsPerUnit(gridInfo(cycle("abakua", "dq"))), 2, "dq: 2 bars per cycle");
-  assert.equal(gapBarsPerUnit(gridInfo(cycle("abakua", "e"))), 2, "e: 2 bars per cycle");
   for(const m of METERS) assert.equal(gapBarsPerUnit(gridInfo(free(m.id, m.sub))), 1, `${m.label}: 1 bar`);
 });
 

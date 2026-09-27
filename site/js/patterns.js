@@ -1,6 +1,6 @@
 // PATTERNS and SPANS: the single source of truth for every pattern. No DOM or audio code here.
 // To add a pattern, add an entry to PATTERNS. It must have 12 or 16 steps, because the
-// "One cycle" options in SPANS are defined per step count.
+// "One cycle" setting in SPANS is defined per step count.
 
 /* Patterns: step indices of the strokes, 0-based. "none" is the Off choice (free mode).
    instrument: the pattern sound picked along with the pattern (clave, campana or cata).
@@ -19,11 +19,10 @@ export const PATTERNS = {
   columbia:   {name:"Catá de Columbia", steps:12, hits:[0,2,3,5,6,7,9], instrument:"cata", sticking:"F . R L . R | L R . F . ."},
 };
 
-/* "One cycle" options per step count.
+/* "One cycle" setting per step count. The owner removed the other options, the 16th-note grid ("1bar") and
+   "counted in 6" ("e"), on 2026-09-27, so each list has one entry.
    spb = steps per BPM beat (where tempo is measured); num = steps per numerator beat of the time signature. */
 export const SPANS = {
-  16: [{id:"2bar", num:2, sig:"4/4", unit:"half note", note:"Cut time · counted in 2", sub2:"BPM = half note · one cycle spans 2 bars", label:"2 bars of 4/4 (8th-note grid)", spb:4, beats:2, accents:[3,2], sub:2},
-       {id:"1bar", num:4, sig:"4/4", unit:"half note", note:"Cut time · counted in 2", sub2:"BPM = half note · one cycle spans 1 bar", label:"1 bar of 4/4 (16th-note grid)", spb:8, beats:2, accents:[3,2], sub:4}],
-  12: [{id:"dq", num:1, sig:"6/8", unit:"dotted quarter note", note:"Counted in 2", sub2:"BPM = dotted quarter note · one cycle spans 2 bars", label:"2 bars of 6/8 (dotted-quarter pulse)", spb:3, beats:2, accents:[3,2], sub:3},
-       {id:"e", num:1, sig:"6/8", unit:"eighth note", note:"Counted in 6", sub2:"BPM = eighth note · one cycle spans 2 bars", label:"2 bars of 6/8 (eighth-note pulse)", spb:1, beats:6, accents:[3,1,1,2,1,1], sub:1}],
+  16: [{id:"2bar", num:2, sig:"4/4", unit:"half note", note:"Cut time · counted in 2", sub2:"BPM = half note · one cycle spans 2 bars", label:"2 bars of 4/4 (8th-note grid)", spb:4, beats:2, accents:[3,2], sub:2}],
+  12: [{id:"dq", num:1, sig:"6/8", unit:"dotted quarter note", note:"Counted in 2", sub2:"BPM = dotted quarter note · one cycle spans 2 bars", label:"2 bars of 6/8 (dotted-quarter pulse)", spb:3, beats:2, accents:[3,2], sub:3}],
 };

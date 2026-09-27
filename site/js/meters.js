@@ -11,4 +11,4 @@ export const METERS = [
 export const SUBS = [{n:1,label:"None"},{n:2,label:"2 per beat"},{n:3,label:"3 per beat"},{n:4,label:"4 per beat"},{n:6,label:"6 per beat"}];
 
 // Switching a pattern Off keeps the feel: each "One cycle" setting maps to the matching free-mode meter.
-export const SPAN_TO_METER = {"2bar":"44in2", "1bar":"44in2", dq:"68in2", e:"68in6"};
+export const SPAN_TO_METER = {"2bar":"44in2", dq:"68in2"};

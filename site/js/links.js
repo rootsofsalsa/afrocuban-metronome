@@ -18,8 +18,10 @@ export const LINK_WORDS = ["pattern", "cycle", "meter", "sub", "bpm", "clicks", 
 const BASE = {bpm:80, sound:"wood", downSound:"click", metOn:true, patOn:true, hits:null, met:null, freeMet:null,
   tr:{on:false, step:2, every:4, target:140}, gap:{on:false, play:2, mute:2, what:"pattern"}, countIn:false};
 
-// "One cycle" choices and Listen-then-play silence targets, as written in links.
-const CYCLE_WORDS = {"2bar":"2bars", "1bar":"1bar", dq:"in2", e:"in6"};
+// "One cycle" choices and Listen-then-play silence targets, as written in links. The owner removed the
+// 16th-note grid (cycle=1bar) and "counted in 6" (cycle=in6) on 2026-09-27, before any posted link used
+// them; a link with either opens the pattern's own setting.
+const CYCLE_WORDS = {"2bar":"2bars", dq:"in2"};
 const SILENCE_WORDS = {pattern:"pattern", clicks:"metronome", all:"all"};
 
 // Metronome row: D = downbeat click, x = click, - = off. Pattern row: x = stroke, - = rest.

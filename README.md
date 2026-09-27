@@ -44,8 +44,8 @@ node --test tests/*.test.js
 Needs Node 22 or newer (on the Mac: `brew install node`). No npm packages are needed.
 
 - `tests/patterns.test.js` checks every pattern's name, step count and strokes against the pattern table in `CLAUDE.md`, and the "One cycle" counting rules.
-- `tests/grid.test.js` checks the metronome-row quick fills (Beats, Downbeats, Every step, Clear) for every "One cycle" option and free-mode meter, plus "Listen, then play" cycle counting.
-- `tests/links.test.js` checks homework links: the link words, five example links, and that every pattern, "One cycle" option and free-mode meter survives the trip through a link.
+- `tests/grid.test.js` checks the metronome-row quick fills (Beats, Downbeats, Every step, Clear) for each pattern length and free-mode meter, plus "Listen, then play" cycle counting.
+- `tests/links.test.js` checks homework links: the link words, five example links, and that every pattern and free-mode meter survives the trip through a link.
 
 If a test fails, the app has drifted from the owner's musical rules. Fix the app, not the test, unless the owner has changed the rule.
 
@@ -73,7 +73,7 @@ If a test fails, the app has drifted from the owner's musical rules. Fix the app
 
 ## Add a pattern
 
-Edit `site/js/patterns.js` only. Add an entry with an id, the display name, the step count (12 or 16) and the 0-based step positions of the strokes. The "One cycle" options come from the step count, so a new pattern must have 12 or 16 steps.
+Edit `site/js/patterns.js` only. Add an entry with an id, the display name, the step count (12 or 16) and the 0-based step positions of the strokes. The "One cycle" setting (the meter and what the BPM counts) comes from the step count, so a new pattern must have 12 or 16 steps.
 
 Also add the pattern to the table in `CLAUDE.md` and to the `CANON` list in `tests/patterns.test.js`, then run `node --test tests/*.test.js`. Follow the naming conventions in `CLAUDE.md`.
 
@@ -83,7 +83,7 @@ Follow the naming convention and recording checklist in `site/samples/README.md`
 
 ## Homework links
 
-A link can carry a whole exercise. A student taps it and the metronome opens set up: pattern, "One cycle", tempo, metronome row, pattern edits, the row on/off switches, sounds, Listen, then play, the speed trainer and count-in. Their own volume levels stay as they are, and nothing plays until they tap Start. A notice at the top shows the link's title, for example "Homework: Week 40".
+A link can carry a whole exercise. A student taps it and the metronome opens set up: pattern, tempo, metronome row, pattern edits, the row on/off switches, sounds, Listen, then play, the speed trainer and count-in. Their own volume levels stay as they are, and nothing plays until they tap Start. A notice at the top shows the link's title, for example "Homework: Week 40".
 
 To make one, open https://metronome.rootsofsalsa.com and set up the exercise. At the bottom, under **Share as a link**, type a title if you like and tap **Copy link**. Paste the link into the YouTube video description, an email or a message. Make links on the live site: a link made on the local preview points at the Mac, which students can't open, and the panel warns about that.
 
@@ -96,7 +96,7 @@ A word only appears when its setting differs from the normal starting value. Any
 | Word | Meaning |
 |---|---|
 | `pattern` | The pattern id from the table in `CLAUDE.md` (`tresdos`, `abakua`, `habanero`…), or `off` for no pattern |
-| `cycle` | "One cycle", only when not the first choice: `1bar` (16-step patterns) or `in6` (12-step patterns) |
+| `cycle` | No longer written. It chose the 16th-note grid (`1bar`) or "counted in 6" (`in6`), removed on 2026-09-27; a link with it opens the pattern's own setting |
 | `meter`, `sub` | With no pattern: `44in2`, `44in4`, `68in2` or `68in6`, and the subdivision `1`, `2`, `3`, `4` or `6` per beat |
 | `bpm` | Tempo, 20 to 300 |
 | `clicks` | The metronome row, if not the Beats default: `D` downbeat click, `x` click, `-` off |

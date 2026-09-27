@@ -1,5 +1,5 @@
 // UI wiring: settings, controls, playhead drawing, homework links and keyboard shortcuts.
-import { PATTERNS, SPANS } from "./patterns.js";
+import { PATTERNS } from "./patterns.js";
 import { METERS, SUBS, SPAN_TO_METER } from "./meters.js";
 import { gridInfo, defaultMet, curSpan, curHits, curMet, metKey, gapBarsPerUnit, rowLength } from "./grid.js";
 import { store, KEYS } from "./storage.js";
@@ -158,16 +158,9 @@ function preview(kind){ if(scheduler.isRunning()) return; unlockAudio(S.vol.mast
 /* Pattern UI */
 const patSel = $("pattern");
 Object.entries(PATTERNS).forEach(([id, p]) => { const o = document.createElement("option"); o.value = id; o.textContent = p.name; patSel.appendChild(o); });
-function renderSpanOptions(){
-  const p = PATTERNS[S.pattern]; const sel = $("span"); sel.innerHTML = "";
-  sel.disabled = !p.steps;
-  if(!p.steps){ const o = document.createElement("option"); o.textContent = "—"; sel.appendChild(o); return; }
-  SPANS[p.steps].forEach(s => { const o = document.createElement("option"); o.value = s.id; o.textContent = s.label; sel.appendChild(o); });
-  if(!SPANS[p.steps].some(s => s.id === S.span)) S.span = SPANS[p.steps][0].id;
-  sel.value = S.span;
-}
 function applySpanMeter(){
   const sp = curSpan(S); if(!sp) return;
+  S.span = sp.id;
   setBeats(sp.beats, sp.accents);
   S.sub = sp.sub; refreshSubs();
 }
@@ -247,8 +240,7 @@ patSel.onchange = () => { const prev = curSpan(S); S.pattern = patSel.value;
   // Choosing a pattern picks its instrument as the pattern sound; the user can still change it.
   const inst = PATTERNS[S.pattern].instrument; if(inst){ S.patSound = inst; refreshPatSounds(); }
   if(!curSpan(S)) applyMeter(METERS.find(m => m.id === (prev ? SPAN_TO_METER[prev.id] : "44in2")), true);
-  S.hits = null; S.met = null; renderSpanOptions(); applySpanMeter(); renderPattern(); save(); };
-$("span").onchange = e => { S.span = e.target.value; S.met = null; applySpanMeter(); renderPattern(); save(); };
+  S.hits = null; S.met = null; applySpanMeter(); renderPattern(); save(); };
 $("metToggle").onclick = () => { S.metOn = !S.metOn; renderPattern(); save(); };
 $("patToggle").onclick = () => { S.patOn = !S.patOn; renderPattern(); save(); };
 document.querySelectorAll("[data-met]").forEach(b => b.onclick = () => { S[metKey(S)] = defaultMet(b.dataset.met, gridInfo(S)); renderPattern(); save(); });
@@ -324,9 +316,12 @@ document.addEventListener("keydown", e => {
 
 function renderAll(){
   if(!curSpan(S) && !METERS.some(m => m.beats === S.beats && m.unit === S.unit)) applyMeter(METERS[0], true);
+  // Settings saved on the 16th-note grid or "counted in 6" (removed by the owner, 2026-09-27) move to the
+  // pattern's own setting. Tempo, speed trainer and clicks start over, since they counted a different note value.
+  if(curSpan(S) && ["1bar", "e"].includes(S.span)){ S.bpm = DEFAULT.bpm; S.tr = structuredClone(DEFAULT.tr); S.met = null; applySpanMeter(); }
   if(![1,2,3,4,6].includes(S.sub)) S.sub = 2;
   setBpm(S.bpm); renderMeter(); refreshSubs(); refreshSounds(); refreshDownSounds(); refreshPatSounds();
-  renderSpanOptions(); renderPattern(); renderTrainer();
+  renderPattern(); renderTrainer();
 }
 renderAll();
 loadSamples();   // recordings in site/samples/, if any; the synthesized voices play until (and unless) they arrive
