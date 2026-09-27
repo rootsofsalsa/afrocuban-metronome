@@ -31,6 +31,7 @@ Last checked on an iPhone 16 Pro Max with iOS 26.6.2 (26 September 2026). Everyt
 - **Leaving Safari:** on a phone, the metronome stops when you switch apps or lock the screen, because the phone can't keep it in time in the background. Tap Start when you're back. If another app (Spotify, a call) used the sound meanwhile, Start sets the sound up again, so no refresh is needed.
 - **Other apps' audio:** tapping Start pauses music playing in other apps, such as Spotify.
 - **Grid:** on a phone, 16-step patterns wrap into two rows of eight at the barline, and 12-step patterns into two rows of six.
+- **Still to check: homework links from YouTube.** Put a homework link in a YouTube video description (an unlisted test video is fine) and tap it in the YouTube app on the iPhone. The app may open it in its own built-in browser instead of Safari. Check that "Homework:" and the title show at the top with the exercise set up, that Start plays with the silent switch on, and that the screen stays awake while it plays.
 
 The page won't work if you double-click `site/index.html`, because browsers don't load JavaScript modules from `file://`. Always use the server.
 
