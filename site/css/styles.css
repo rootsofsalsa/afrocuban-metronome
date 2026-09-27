@@ -124,6 +124,13 @@ input[type=number]{width:76px;font-variant-numeric:tabular-nums}
 .sw input{accent-color:var(--accent);width:16px;height:16px}
 .sub{display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px}
 .sub .row{font-size:15px}
+/* Homework links: the notice when the page opens from a link, and the Share panel. */
+.notice{margin:0 0 16px;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px}
+#linkTitle{flex:1;min-width:0}
+#copyLink{padding:8px 14px}
+.link-out{margin:0;font-size:14px;overflow-wrap:anywhere;-webkit-user-select:all;user-select:all}
+#copyStatus:empty{display:none}
+.link-local{color:var(--accent)}
 /* Copyright line, in the owner's full formal wording (same as the README). */
 .foot{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
 /* Touch screens: every control is at least 40px tall, and each grid cell's tap area takes in the gap

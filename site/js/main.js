@@ -1,8 +1,9 @@
-// UI wiring: settings, controls, playhead drawing and keyboard shortcuts.
+// UI wiring: settings, controls, playhead drawing, homework links and keyboard shortcuts.
 import { PATTERNS, SPANS } from "./patterns.js";
 import { METERS, SUBS, SPAN_TO_METER } from "./meters.js";
 import { gridInfo, defaultMet, curSpan, curHits, curMet, metKey, gapBarsPerUnit, rowLength } from "./grid.js";
 import { store, KEYS } from "./storage.js";
+import { makeLink, readLink, LIVE_SITE } from "./links.js";
 import { CLICK_SOUNDS, PATTERN_SOUNDS, ctx, unlockAudio, pauseKeepAlive, resumeAudio, setMasterVolume, voice, loadSamples } from "./audio.js";
 import * as scheduler from "./scheduler.js";
 
@@ -21,9 +22,14 @@ const DEFAULT = {
 };
 const S = Object.assign(structuredClone(DEFAULT), store.get(KEYS.state, {}));
 S.vol = Object.assign({}, DEFAULT.vol, S.vol); S.tr = Object.assign({}, DEFAULT.tr, S.tr); S.gap = Object.assign({}, DEFAULT.gap, S.gap);
+// A homework link (?pattern=…) sets up the whole exercise, all but the volume levels. The address then goes
+// back to the plain page, so later changes and reloads work as usual (the settings are saved below).
+const link = readLink(location.search);
+if(link?.settings) Object.assign(S, link.settings);
+if(link) history.replaceState(null, "", location.pathname);
 if(!PATTERNS[S.pattern]){ S.pattern = "none"; S.hits = null; }
 fixSounds(S);
-const save = () => store.set(KEYS.state, S);
+const save = () => { store.set(KEYS.state, S); showLink(); };
 
 // Phase 4 changed the sound lists: Cowbell became Campana, and the instruments are no longer click sounds.
 // Settings saved before that are brought up to date here.
@@ -282,6 +288,28 @@ $("trOn").checked = S.tr.on; $("trOn").onchange = e => { S.tr.on = e.target.chec
 $("gapWhat").value = S.gap.what || "pattern"; $("gapWhat").onchange = e => { S.gap.what = e.target.value; save(); };
 $("gapOn").checked = S.gap.on; $("gapOn").onchange = e => { S.gap.on = e.target.checked; save(); };
 $("countIn").checked = S.countIn; $("countIn").onchange = e => { S.countIn = e.target.checked; save(); };
+
+/* Homework links */
+// Opened from a link: say so at the top, with the link's title.
+if(link){
+  const n = $("linkNotice"); n.hidden = false;
+  if(!link.settings) n.textContent = "This link's pattern isn't in the metronome, so it opened with your last settings.";
+  else if(link.title){ const b = document.createElement("b"); b.textContent = link.title; n.append("Homework: ", b); }
+  else n.textContent = "Set up from a homework link.";
+}
+// Links made on the live site point there. On the local preview they point at the preview, which students
+// can't open, so the panel warns about that.
+function onLiveSite(){ return location.hostname === new URL(LIVE_SITE).hostname; }
+function currentLink(){ return makeLink(S, $("linkTitle").value, onLiveSite() ? LIVE_SITE : location.origin + location.pathname); }
+// The Share panel always shows the link for the current settings (save() calls this after every change).
+function showLink(){ $("linkOut").textContent = currentLink(); $("copyStatus").textContent = ""; }
+$("linkLocal").hidden = onLiveSite();
+$("linkTitle").oninput = showLink;
+$("copyLink").onclick = async () => {
+  showLink();
+  try{ await navigator.clipboard.writeText(currentLink()); $("copyStatus").textContent = "Link copied."; }
+  catch(e){ getSelection().selectAllChildren($("linkOut")); $("copyStatus").textContent = "Couldn't copy it automatically. The link is selected, so copy it from there."; }
+};
 
 /* Keyboard */
 document.addEventListener("keydown", e => {

@@ -26,6 +26,7 @@
     </div>
     <div class="keys"><span><kbd>Space</kbd> start/stop</span><span><kbd>↑</kbd><kbd>↓</kbd> ±1 (<kbd>Shift</kbd> ±5)</span><span><kbd>T</kbd> tap</span></div>
   </header>
+  <p class="notice" id="linkNotice" role="status" hidden></p>
 
   <div class="grid">
     <section class="transport" id="transport" aria-label="Transport">
@@ -117,6 +118,15 @@
         <div class="slider"><span>Master</span><input type="range" id="vMaster" min="0" max="100" value="80"><output id="vMasterOut">80</output></div>
         <div class="slider"><span>Clicks</span><input type="range" id="vBeat" min="0" max="100" value="85"><output id="vBeatOut">85</output></div>
         <div class="slider"><span>Pattern</span><input type="range" id="vPat" min="0" max="100" value="80"><output id="vPatOut">80</output></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-share">
+        <h2 id="h-share">Share as a link</h2>
+        <p class="hint">The link opens the metronome set up exactly like this, practice tools included. Volume levels stay each person's own.</p>
+        <div class="row"><input type="text" id="linkTitle" maxlength="80" placeholder="Title (optional), e.g. Week 40" aria-label="Link title"><button class="btn" id="copyLink">Copy link</button></div>
+        <p class="link-out" id="linkOut"></p>
+        <p class="hint" id="copyStatus" aria-live="polite"></p>
+        <p class="hint link-local" id="linkLocal" hidden>This is the local preview, so students can't open this link. Make homework links on metronome.rootsofsalsa.com.</p>
       </section>
 
     </div>
