@@ -74,8 +74,9 @@ Steps are 0-based. `x` = stroke, `.` = rest, `|` = barline.
   - **Clear** turns every step off.
 - **Pattern row:** step toggles (edits are allowed and marked "(edited)"), plus an on/off toggle. Both rows share one playhead.
 - **Listen, then play:** silent sections counted in *pattern cycles* (bars in free mode). Silence targets "pattern only" (the default), "metronome only" or "everything". The status badge shows "Listen · n of N" and "Your turn · n of N", and the pattern row dims during the student's turn.
-- Other features to keep: tap tempo, speed trainer, count-in, keyboard shortcuts (Space, ↑/↓, Shift, T), and saved setups in localStorage.
+- Other features to keep: tap tempo, speed trainer, count-in, keyboard shortcuts (Space, ↑/↓, Shift, T), and remembering each person's last settings in localStorage.
 - Removed on purpose, don't bring back: swing, beat flash, beat pads, Italian tempo markings.
+- Saved setups were removed at the owner's request (2026-09-26), to keep the app focused. Bring them back only if the owner asks, for example because students want them.
 
 ## Architecture
 

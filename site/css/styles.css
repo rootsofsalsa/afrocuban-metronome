@@ -124,13 +124,6 @@ input[type=number]{width:76px;font-variant-numeric:tabular-nums}
 .sw input{accent-color:var(--accent);width:16px;height:16px}
 .sub{display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px}
 .sub .row{font-size:15px}
-.presets{display:grid;gap:6px}
-.preset{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
-.preset .meta{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
-.preset button{font:600 14px var(--body);border:0;background:transparent;color:var(--accent);cursor:pointer;padding:4px 6px}
-#presetName{flex:1;min-width:0}
-#savePreset{padding:8px 14px}
-.empty{font-size:14px;color:var(--muted)}
 /* Copyright line, in the owner's full formal wording (same as the README). */
 .foot{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
 /* Touch screens: every control is at least 40px tall, and each grid cell's tap area takes in the gap
@@ -141,9 +134,8 @@ input[type=number]{width:76px;font-variant-numeric:tabular-nums}
   .cell::after{content:"";position:absolute;inset:-4px}
   #metCells .cell::after{inset:-7px -4px}
   #metCells{row-gap:12px}
-  .mute,.mini,.chip,.sw,.btn,select,input[type=text],input[type=number],.preset button{min-height:40px}
+  .mute,.mini,.chip,.sw,.btn,select,input[type=text],input[type=number]{min-height:40px}
   .mini{padding-inline:8px}
-  .preset button{min-width:40px}
   input[type=range]{height:40px}
   .keys{display:none}   /* the keyboard shortcuts legend: phones and tablets have no keyboard to use it with */
 }

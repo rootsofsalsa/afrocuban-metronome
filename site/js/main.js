@@ -1,4 +1,4 @@
-// UI wiring: settings, controls, playhead drawing, saved setups and keyboard shortcuts.
+// UI wiring: settings, controls, playhead drawing and keyboard shortcuts.
 import { PATTERNS, SPANS } from "./patterns.js";
 import { METERS, SUBS, SPAN_TO_METER } from "./meters.js";
 import { gridInfo, defaultMet, curSpan, curHits, curMet, metKey, gapBarsPerUnit, rowLength } from "./grid.js";
@@ -26,7 +26,7 @@ fixSounds(S);
 const save = () => store.set(KEYS.state, S);
 
 // Phase 4 changed the sound lists: Cowbell became Campana, and the instruments are no longer click sounds.
-// Settings and setups saved before that are brought up to date here.
+// Settings saved before that are brought up to date here.
 function fixSounds(s){
   if(!CLICK_SOUNDS.some(x => x.id === s.sound)) s.sound = DEFAULT.sound;
   if(!CLICK_SOUNDS.some(x => x.id === s.downSound)) s.downSound = DEFAULT.downSound;
@@ -283,45 +283,6 @@ $("gapWhat").value = S.gap.what || "pattern"; $("gapWhat").onchange = e => { S.g
 $("gapOn").checked = S.gap.on; $("gapOn").onchange = e => { S.gap.on = e.target.checked; save(); };
 $("countIn").checked = S.countIn; $("countIn").onchange = e => { S.countIn = e.target.checked; save(); };
 
-/* Presets */
-const EXAMPLES = [
-  {name:"Salsa · Clave Tres Dos", ex:true, s:{bpm:90, beats:2, accents:[3,2], sub:2, sound:"wood", patSound:"clave", pattern:"tresdos", hits:null, span:"2bar"}},
-  {name:"Yambú · Clave de Yambú Matancera", ex:true, s:{bpm:44, beats:2, accents:[3,2], sub:2, sound:"wood", patSound:"clave", pattern:"yambu", hits:null, span:"2bar"}},
-  {name:"Abakuá · Campana de Abakuá", ex:true, s:{bpm:100, beats:2, accents:[3,2], sub:3, sound:"wood", patSound:"campana", pattern:"abakua", hits:null, span:"dq"}},
-];
-let presets = (store.get(KEYS.presets, null) || EXAMPLES.slice()).filter(p => PATTERNS[p.s.pattern]);
-function renderPresets(){
-  const box = $("presetList"); box.innerHTML = "";
-  if(!presets.length){ box.innerHTML = '<p class="empty">No saved setups yet.</p>'; return; }
-  presets.forEach((p, i) => {
-    const d = document.createElement("div"); d.className = "preset";
-    const pat = PATTERNS[p.s.pattern]?.steps ? " · " + PATTERNS[p.s.pattern].name : "";
-    const info = document.createElement("div"), title = document.createElement("div"), meta = document.createElement("div");
-    title.textContent = p.name;
-    if(p.ex){ const tag = document.createElement("span"); tag.className = "hint"; tag.textContent = "example"; title.append(" ", tag); }
-    meta.className = "meta"; meta.textContent = `${p.s.bpm} BPM · ${p.s.beats} beats${pat}`;
-    info.append(title, meta);
-    const btns = document.createElement("div");
-    const load = document.createElement("button"); load.textContent = "Load"; load.onclick = () => loadPreset(p.s);
-    const del = document.createElement("button"); del.textContent = "Delete"; del.onclick = () => { presets.splice(i,1); store.set(KEYS.presets, presets); renderPresets(); };
-    btns.append(load, del); d.append(info, btns); box.appendChild(d);
-  });
-}
-function loadPreset(s){
-  Object.assign(S, {met:null, freeMet:null, metOn:true, patOn:true, downSound:"click"}, structuredClone(s));
-  fixSounds(S);
-  const sp = curSpan(S); if(sp){ S.beats = sp.beats; S.accents = sp.accents.slice(); }
-  S.accents = S.accents.slice(0, S.beats);
-  renderAll(); save();
-}
-$("savePreset").onclick = () => {
-  const name = $("presetName").value.trim() || `${S.bpm} BPM · ${S.beats} beats`;
-  const {bpm,beats,accents,sub,unit,per,sound,downSound,patSound,pattern,hits,span,met,freeMet,metOn,patOn} = S;
-  presets.unshift({name, s:structuredClone({bpm,beats,accents,sub,unit,per,sound,downSound,patSound,pattern,hits,span,met,freeMet,metOn,patOn})});
-  store.set(KEYS.presets, presets); $("presetName").value = ""; renderPresets();
-};
-$("presetName").onkeydown = e => { if(e.key === "Enter") $("savePreset").click(); };
-
 /* Keyboard */
 document.addEventListener("keydown", e => {
   const tag = e.target.tagName;
@@ -337,7 +298,7 @@ function renderAll(){
   if(!curSpan(S) && !METERS.some(m => m.beats === S.beats && m.unit === S.unit)) applyMeter(METERS[0], true);
   if(![1,2,3,4,6].includes(S.sub)) S.sub = 2;
   setBpm(S.bpm); renderMeter(); refreshSubs(); refreshSounds(); refreshDownSounds(); refreshPatSounds();
-  renderSpanOptions(); renderPattern(); renderPresets(); renderTrainer();
+  renderSpanOptions(); renderPattern(); renderTrainer();
 }
 renderAll();
 loadSamples();   // recordings in site/samples/, if any; the synthesized voices play until (and unless) they arrive

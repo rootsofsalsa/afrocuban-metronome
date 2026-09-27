@@ -58,7 +58,7 @@ If a test fails, the app has drifted from the owner's musical rules. Fix the app
 | `site/js/audio.js` | Sounds: recorded samples when present, synthesized voices otherwise; audio unlock on phones |
 | `site/js/samples.js` | Which recording files the app looks for, and which one plays for each stroke |
 | `site/js/scheduler.js` | Timing: lookahead scheduler, count-in, listen-then-play, speed trainer |
-| `site/js/storage.js` | Saved settings and setups (localStorage) |
+| `site/js/storage.js` | Remembers each person's last settings (localStorage) |
 | `site/js/main.js` | Wires the page controls to everything above |
 | `tests/` | Automated checks, run with Node |
 | `.github/workflows/pages.yml` | Runs the tests and publishes `site/` on every push to `main` |
