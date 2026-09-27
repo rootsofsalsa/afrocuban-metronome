@@ -2,7 +2,7 @@
 
 An Afro-Cuban percussion trainer for Vincent's (Roots of Salsa) percussion students. It plays clave, campana and catá patterns over a step-grid metronome, on desktop and mobile browsers.
 
-**Current stage: local only.** A local git repo on the owner's Mac Studio, previewed with a local web server. There is no GitHub remote and no deployment yet. Later it will move to GitHub and GitHub Pages at metronome.rootsofsalsa.com, linked from rootsofsalsa.com (Squarespace). Keep the code ready for that, but don't set up remotes, workflows or DNS until the owner asks.
+**Current stage: live.** The repo is public on GitHub at `rootsofsalsa/afrocuban-metronome` (all rights reserved, see `LICENSE`), and GitHub Pages serves `site/` at https://metronome.rootsofsalsa.com. DNS is in Squarespace: a CNAME record `metronome` → `rootsofsalsa.github.io`. The owner edits on the Mac Studio and previews locally before pushing. It will be linked from rootsofsalsa.com (Squarespace).
 
 The owner is a professional percussionist and teacher, and new to Claude Code. Explain what you're about to do in plain language before doing it. Keep changes small and reviewable.
 
@@ -79,7 +79,7 @@ Steps are 0-based. `x` = stroke, `.` = rest, `|` = barline.
 
 ## Architecture
 
-- A static site: plain HTML, CSS and vanilla JavaScript ES modules. **No build step and no framework.** Everything served lives in `site/`, which a local server serves now and GitHub Pages will serve later.
+- A static site: plain HTML, CSS and vanilla JavaScript ES modules. **No build step and no framework.** Everything served lives in `site/`, which GitHub Pages serves live and a local server serves for previews.
 - Audio uses the Web Audio API with a lookahead scheduler (timer every 25 ms, scheduling 120 ms ahead). Never schedule sound with `setTimeout` timing.
 - **Phones (owner-confirmed after testing on an iPhone, Phase 3):** the page uses the "playback" audio session, so it plays with the silent switch on and pauses other apps' audio (Spotify) when Start is tapped. That is the desired behavior. On touch screens the metronome stops when the page goes to the background, because the phone can't keep it in time there; the owner chose stopping over trying to play on. Keep both. Verified on the owner's iPhone 16 Pro Max, iOS 26.6.2 (2026-09-26). That iOS has the Audio Session API, so the silent `<audio>` fallback for iOS before 16.4 hasn't been tested on a real phone.
 - **Samples:** load recorded one-shots from `site/samples/` when present, and fall back to the synthesized voices. A stroke must not cut off the previous stroke of the same instrument abruptly; use a short fade (choke) when a new stroke starts.
@@ -88,17 +88,17 @@ Steps are 0-based. `x` = stroke, `.` = rest, `|` = barline.
   - The synthesized catá stand-in plays a flam as one ordinary stroke. Don't try to synthesize a flam (owner).
   - Later, not in v1 (owner): once the recordings have proven reliable with students for a while, remove the synthesized pattern sounds altogether. Discuss with the owner first.
 - Pattern definitions live in one data file (`site/js/patterns.js`). Adding a pattern should only mean editing that file.
-- Later (not now): deploy through a GitHub Actions workflow on every push to `main`.
+- Deploys run through `.github/workflows/pages.yml` on every push to `main`: the tests run first, and only if they pass does `site/` go live. Don't add a build step to it.
 
 ## Commands
 
 - Local preview: `python3 -m http.server 8000 --directory site`, then open http://localhost:8000. ES modules don't load from `file://`, so always use the server.
-- Phone testing on the same Wi-Fi: `python3 -m http.server 8000 --directory site --bind 0.0.0.0`, then open `http://<Mac's local IP>:8000` on the phone. Screen wake lock needs HTTPS or localhost, so it won't work over the LAN address. That's expected until the site is on GitHub Pages.
-- Tests: `node --test tests/` (Node 22+). Keep the pattern-data tests passing; they guard the notation above.
+- Phone testing on the same Wi-Fi: `python3 -m http.server 8000 --directory site --bind 0.0.0.0`, then open `http://<Mac's local IP>:8000` on the phone. Screen wake lock needs HTTPS or localhost, so it won't work over the LAN address. Test it on the live site.
+- Tests: `node --test tests/*.test.js` (Node 22+; the bare `tests/` folder form only works on Node 26). Keep the pattern-data tests passing; they guard the notation above.
 
 ## Working agreements
 
 - Before a multi-file change, show a short plan and wait for approval.
-- Commit locally in small, logical steps with clear messages. There's no remote yet, so never push.
+- Commit locally in small, logical steps with clear messages. Push to GitHub only when the owner asks: a push to `main` updates the live site within a few minutes.
 - After each change, tell the owner exactly what to click or listen for to check it.
 - Test mobile behavior, especially iPhone Safari: the silent switch, audio unlocking on first tap, and the screen staying awake.
