@@ -18,3 +18,10 @@ export function sampleKey(sound, hand){
   if(!SAMPLE_STROKES[sound]) return null;
   return sound === "cata" ? `cata-${CATA_STROKES[hand] || "right"}` : `${sound}-main`;
 }
+
+// Flam (owner): the grace note comes slightly before the beat, and the main stroke is on the beat. Every flam
+// recording has its main stroke 25 ms after where other recordings start their stroke, so flams start 25 ms early.
+export const FLAM_LEAD = 0.025;   // seconds
+
+// How far ahead of the beat a recording starts.
+export const sampleLead = (key) => key === "cata-flam" ? FLAM_LEAD : 0;

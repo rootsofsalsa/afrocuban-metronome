@@ -1,5 +1,5 @@
 // AudioContext, unlocking audio on phones, recorded samples (with choke) and synthesized voices.
-import { SAMPLE_STROKES, MAX_TAKES, sampleFile, sampleKey } from "./samples.js";
+import { SAMPLE_STROKES, MAX_TAKES, sampleFile, sampleKey, sampleLead } from "./samples.js";
 
 // Metronome click sounds: always synthesized. The instruments are never click sounds (owner's choice).
 export const CLICK_SOUNDS = [{id:"click",label:"Click"},{id:"wood",label:"Woodblock"},{id:"stick",label:"Rim"},{id:"beep",label:"Beep"}];
@@ -103,20 +103,22 @@ export const loadedSamples = () => Object.fromEntries(Object.entries(samples).ma
 
 // Play one recorded stroke at audio time t. Takes rotate, so repeats sound less mechanical. Choke: the
 // previous stroke of the same instrument fades out over 15 ms as this one starts, instead of ringing
-// on under it or stopping dead.
+// on under it or stopping dead. A flam starts early, so its main stroke lands on t (see sampleLead); if that
+// moment has already passed, it starts now and skips part of its lead-in, never into the stroke itself.
 function playSample(inst, key, t, gain){
   const takes = samples[key], n = turn[key] = ((turn[key] ?? -1) + 1) % takes.length;
   const src = ctx.createBufferSource(), g = ctx.createGain();
   src.buffer = takes[n]; g.gain.value = gain;
   src.connect(g).connect(master);
+  const lead = sampleLead(key), at = Math.max(t - lead, ctx.currentTime), skip = Math.min(at - (t - lead), lead);
   const prev = lastStroke[inst];
-  if(prev && prev.end > t){
-    prev.g.gain.setValueAtTime(prev.gain, t);
-    prev.g.gain.linearRampToValueAtTime(0, t + CHOKE);
-    prev.src.stop(t + CHOKE);
+  if(prev && prev.end > at){
+    prev.g.gain.setValueAtTime(prev.gain, at);
+    prev.g.gain.linearRampToValueAtTime(0, at + CHOKE);
+    prev.src.stop(at + CHOKE);
   }
-  src.start(t);
-  lastStroke[inst] = {src, g, gain, end: t + src.buffer.duration};
+  src.start(at, skip);
+  lastStroke[inst] = {src, g, gain, end: at - skip + src.buffer.duration};
 }
 
 export function setMasterVolume(vol){

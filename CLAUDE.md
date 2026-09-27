@@ -88,6 +88,7 @@ Steps are 0-based. `x` = stroke, `.` = rest, `|` = barline.
   - Files (owner): `clave-main-N.m4a`, `campana-main-N.m4a`, and `cata-right-N`, `cata-left-N`, `cata-flam-N.m4a`. Catá plays the recording for each stroke's hand from the sticking. Naming lives in `site/js/samples.js` and `site/samples/README.md`.
   - Only the pattern sounds (Clave, Campana, Catá) use recordings. The metronome click sounds are Click, Woodblock, Rim and Beep, always synthesized; never offer the instruments as click sounds (owner).
   - The synthesized catá stand-in plays a flam as one ordinary stroke. Don't try to synthesize a flam (owner).
+  - **Flam timing (owner, 2026-09-27):** the grace note comes slightly before the beat and the main stroke is on the beat. Flam recordings have their main stroke 25 ms in, and the app starts them 25 ms early (`FLAM_LEAD`). Details in `site/samples/README.md`.
   - Later, not in v1 (owner): once the recordings have proven reliable with students for a while, remove the synthesized pattern sounds altogether. Discuss with the owner first.
 - Pattern definitions live in one data file (`site/js/patterns.js`). Adding a pattern should only mean editing that file.
 - Deploys run through `.github/workflows/pages.yml` on every push to `main`: the tests run first, and only if they pass does `site/` go live. Don't add a build step to it.

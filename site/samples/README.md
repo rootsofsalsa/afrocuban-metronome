@@ -22,6 +22,7 @@ Number the takes 1, 2, 3… with no gaps, up to 10 per stroke. The app stops loo
 - Takes rotate in order (1, 2, 3… then back to 1), so repeated strokes sound less mechanical.
 - Catá plays the right-hand, left-hand or flam recording for each stroke, following the sticking in `site/js/patterns.js`.
 - When a new stroke of the same instrument starts, the previous one fades out over 15 ms (choke) instead of ringing on under it.
+- **Flams (owner):** the grace note comes slightly before the beat and the main stroke is on the beat. Every `cata-flam` file has its main stroke 25 ms after where other files start their stroke (so at 25.5 ms), with silence added before the grace note as needed, and the app starts flam files 25 ms early (`FLAM_LEAD` in `site/js/samples.js`). A new flam recording must follow this.
 
 ## The recordings in the app (owner, 2026-09-27)
 
@@ -31,7 +32,7 @@ Number the takes 1, 2, 3… with no gaps, up to 10 per stroke. The app stops loo
 | `campana-main-1` … `8` | 8 | 2, 4, 5, 6, 7, 9, 11, 12 |
 | `cata-right-1` … `7` | 7 | 2, 5, 6, 9, 10, 12, 13 |
 | `cata-left-1` … `5` | 5 | 5, 7, 8, 11, 12 |
-| `cata-flam-1` … `5` | 5 | 4, 5, 6, 8, 9 (the tighter flams, grace note about 20 ms ahead) |
+| `cata-flam-1` … `5` | 5 | 4, 5, 6, 8, 9 (the tighter flams, grace note 17.5–23.8 ms ahead of the main stroke) |
 
 Raw hits are numbered in playing order within each raw file (about 15 per sound).
 
